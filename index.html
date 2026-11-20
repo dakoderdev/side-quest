@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#2b1838" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Side Quests" />
+    <link
+      rel="stylesheet"
+      crossorigin="anonymous"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..24,400,1,-25..0&icon_names=add,alarm,apparel,auto_awesome,bathtub,bed,bedtime,cake,call,celebration,chair,chat,check,checkroom,child_care,clean_hands,cleaning_services,coffee,cooking,delete,dentistry,directions_bike,directions_run,directions_walk,draw,edit,edit_note,egg,favorite,fitness_center,groups,headphones,hiking,home,iron,kitchen,laptop,local_florist,local_grocery_store,local_laundry_service,mail,medication,menu_book,monitor_heart,music_note,palette,pets,photo_camera,piano,pill,pool,potted_plant,receipt_long,recycling,remove,restaurant,rocket_launch,savings,schedule,school,self_improvement,shower,smartphone,sports_esports,sports_gymnastics,star,steps,sunny,vaccines,view_agenda,water_drop,work,yard&display=block"
+    />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="icon-192.png" />
+    <title>Side Quests</title>
+    <link rel="stylesheet" href="css/fonts.css" />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <canvas id="fx" aria-hidden="true"></canvas>
+    <div class="app">
+      <aside class="side">
+        <div class="logo" aria-label="Side Quests">SIDE<br />QUESTS</div>
+        <span class="clock num" data-clock></span>
+        <nav class="menu" aria-label="Main">
+          <button class="sel" aria-current="page" id="mQuests">
+            <span class="ms" aria-hidden="true">menu_book</span>Quests
+          </button>
+          <button class="sel" id="mNew">
+            <span class="ms" aria-hidden="true">add</span>New quest
+          </button>
+        </nav>
+        <div class="summary num" id="summary"></div>
+        <svg class="mseam" viewBox="0 0 100 20" preserveAspectRatio="none" aria-hidden="true">
+          <line
+            x1="0"
+            y1="20"
+            x2="100"
+            y2="0"
+            stroke="#3be8e2"
+            stroke-width="2.5"
+            vector-effect="non-scaling-stroke"
+          />
+        </svg>
+      </aside>
+      <div class="seam" aria-hidden="true">
+        <svg viewBox="0 0 44 100" preserveAspectRatio="none">
+          <polygon points="44,0 44,100 0,100" fill="#1c1e4f" />
+          <line
+            x1="44"
+            y1="0"
+            x2="0"
+            y2="100"
+            stroke="#3be8e2"
+            stroke-width="2"
+            vector-effect="non-scaling-stroke"
+          />
+        </svg>
+      </div>
+
+      <main class="main">
+        <header class="top">
+          <span class="clock num" data-clock></span>
+          <span class="key" aria-hidden="true">L1</span>
+          <div class="tabs" role="tablist" id="tabs">
+            <button class="t-nav" role="tab" aria-selected="true" data-f="all">All</button>
+            <button class="t-nav" role="tab" aria-selected="false" data-f="todo">To do</button>
+            <button class="t-nav" role="tab" aria-selected="false" data-f="done">Done today</button>
+          </div>
+          <button
+            class="iconbtn density"
+            id="density"
+            aria-pressed="false"
+            aria-label="Compact view"
+          >
+            <span class="ms" aria-hidden="true">view_agenda</span>
+          </button>
+        </header>
+        <section class="content" aria-live="polite">
+          <div class="grid" id="grid"></div>
+          <div class="empty" id="empty" hidden></div>
+        </section>
+      </main>
+    </div>
+
+    <div class="dock">
+      <button class="btn" id="dNew"><span class="ms" aria-hidden="true">add</span>New quest</button>
+    </div>
+
+    <div class="overlay" id="overlay">
+      <form
+        class="sheet"
+        id="form"
+        autocomplete="off"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="sheetT"
+      >
+        <h2 id="sheetT">New quest</h2>
+        <p class="lede" id="sheetL">Keep it tiny: one step you can do in 1 to 8 minutes.</p>
+        <div class="field">
+          <label class="lbl" for="fName">Name</label>
+          <input id="fName" maxlength="40" placeholder="Put on shoes" enterkeyhint="done" />
+        </div>
+        <div class="field">
+          <span class="lbl" id="iconL">Icon</span>
+          <div class="choices icons" id="fIcons" role="group" aria-labelledby="iconL"></div>
+        </div>
+        <div class="field">
+          <span class="lbl" id="paceL">Level up every</span>
+          <div class="choices pace" id="fPace" role="group" aria-labelledby="paceL">
+            <button type="button" class="sel" data-v="3" aria-pressed="false">
+              <b>3 times</b><span>Quick</span>
+            </button>
+            <button type="button" class="sel" data-v="5" aria-pressed="true">
+              <b>5 times</b><span>Steady</span>
+            </button>
+            <button type="button" class="sel" data-v="10" aria-pressed="false">
+              <b>10 times</b><span>Long haul</span>
+            </button>
+          </div>
+        </div>
+        <div class="field" id="countF" hidden>
+          <span class="lbl" id="countL">Times completed</span>
+          <div class="stepper" role="group" aria-labelledby="countL">
+            <button type="button" class="iconbtn" data-step="-1" aria-label="One less">
+              <span class="ms" aria-hidden="true">remove</span>
+            </button>
+            <output id="fCount" class="num" aria-live="polite">0</output>
+            <button type="button" class="iconbtn" data-step="1" aria-label="One more">
+              <span class="ms" aria-hidden="true">add</span>
+            </button>
+          </div>
+          <p class="hint">Fix a miscount here. The level updates to match.</p>
+        </div>
+        <div class="row">
+          <button type="button" class="danger" id="fDelete" hidden>Delete quest</button
+          ><button type="button" class="btn quiet" id="cancel">Cancel</button
+          ><button class="btn" type="submit" id="fSubmit">Start quest</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="snack" id="snack" role="status">
+      <p id="snackT"></p>
+      <button type="button" id="snackU">Undo</button>
+    </div>
+
+    <div class="lvup" id="lvup" aria-live="assertive">
+      <div class="band">
+        <h2 id="lvN"></h2>
+        <p id="lvT"></p>
+      </div>
+    </div>
+
+    <script src="js/icons.js"></script>
+    <script src="js/sound.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/effects.js"></script>
+  </body>
+</html>

@@ -1,0 +1,14 @@
+# No build step: publish the folder as-is.
+[build]
+  publish = "."
+
+# Browsers must always re-check the service worker, or app updates can get stuck.
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/manifest.webmanifest"
+  [headers.values]
+    Cache-Control = "no-cache"
