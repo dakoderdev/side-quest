@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#2b1838" />
+    <meta name="theme-color" content="#2a1838" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -11,7 +11,7 @@
     <link
       rel="stylesheet"
       crossorigin="anonymous"
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..24,400,1,-25..0&icon_names=add,alarm,apparel,auto_awesome,bathtub,bed,bedtime,cake,call,celebration,chair,chat,check,checkroom,child_care,clean_hands,cleaning_services,coffee,cooking,delete,dentistry,directions_bike,directions_run,directions_walk,draw,edit,edit_note,egg,favorite,fitness_center,groups,headphones,hiking,home,iron,kitchen,laptop,local_florist,local_grocery_store,local_laundry_service,mail,medication,menu_book,monitor_heart,music_note,palette,pets,photo_camera,piano,pill,pool,potted_plant,receipt_long,recycling,remove,restaurant,rocket_launch,savings,schedule,school,self_improvement,shower,smartphone,sports_esports,sports_gymnastics,star,steps,sunny,vaccines,view_agenda,water_drop,work,yard&display=block"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..24,400,1,-25..0&icon_names=add,alarm,apparel,auto_awesome,bathtub,bed,bedtime,cake,call,celebration,chair,chat,check,checkroom,child_care,clean_hands,cleaning_services,coffee,cooking,delete,dentistry,directions_bike,directions_run,directions_walk,draw,edit,edit_note,egg,favorite,fitness_center,groups,headphones,hiking,home,iron,kitchen,laptop,local_florist,local_grocery_store,local_laundry_service,mail,medication,menu_book,monitor_heart,music_note,palette,pets,photo_camera,piano,pill,pool,potted_plant,receipt_long,recycling,remove,restaurant,rocket_launch,savings,schedule,school,self_improvement,settings,shower,smartphone,sports_esports,sports_gymnastics,star,steps,sunny,vaccines,view_agenda,water_drop,work,yard&display=block"
     />
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="apple-touch-icon" href="icon-192.png" />
@@ -20,11 +20,12 @@
     <link rel="stylesheet" href="css/styles.css" />
   </head>
   <body>
+    <canvas id="bgmap" aria-hidden="true"></canvas>
     <canvas id="fx" aria-hidden="true"></canvas>
     <div class="app">
       <aside class="side">
         <div class="logo" aria-label="Side Quests">SIDE<br />QUESTS</div>
-        <span class="clock num" data-clock></span>
+        <div class="points" data-points aria-hidden="true"></div>
         <nav class="menu" aria-label="Main">
           <button class="sel" aria-current="page" id="mQuests">
             <span class="ms" aria-hidden="true">menu_book</span>Quests
@@ -33,43 +34,60 @@
             <span class="ms" aria-hidden="true">add</span>New quest
           </button>
         </nav>
-        <div class="summary num" id="summary"></div>
-        <svg class="mseam" viewBox="0 0 100 20" preserveAspectRatio="none" aria-hidden="true">
-          <line
-            x1="0"
-            y1="20"
-            x2="100"
-            y2="0"
-            stroke="#3be8e2"
-            stroke-width="2.5"
-            vector-effect="non-scaling-stroke"
-          />
-        </svg>
+        <div class="side-foot">
+          <button class="sel" id="mSet">
+            <span class="ms" aria-hidden="true">settings</span>Settings
+          </button>
+          <button class="iconbtn" id="sDensity" aria-pressed="false" aria-label="Compact view">
+            <span class="ms" aria-hidden="true">view_agenda</span>
+          </button>
+        </div>
       </aside>
-      <div class="seam" aria-hidden="true">
-        <svg viewBox="0 0 44 100" preserveAspectRatio="none">
-          <polygon points="44,0 44,100 0,100" fill="#1c1e4f" />
-          <line
-            x1="44"
-            y1="0"
-            x2="0"
-            y2="100"
-            stroke="#3be8e2"
-            stroke-width="2"
-            vector-effect="non-scaling-stroke"
-          />
-        </svg>
-      </div>
 
       <main class="main">
         <header class="top">
           <span class="clock num" data-clock></span>
-          <span class="key" aria-hidden="true">L1</span>
-          <div class="tabs" role="tablist" id="tabs">
-            <button class="t-nav" role="tab" aria-selected="true" data-f="all">All</button>
-            <button class="t-nav" role="tab" aria-selected="false" data-f="todo">To do</button>
-            <button class="t-nav" role="tab" aria-selected="false" data-f="done">Done today</button>
+          <div class="tabbar">
+            <button class="key" data-shift="-1" tabindex="-1" aria-label="Previous tab (Q)">
+              Q
+            </button>
+            <div class="tabs" role="tablist" id="tabs" aria-label="Filter quests">
+              <button
+                class="t-nav"
+                role="tab"
+                aria-selected="true"
+                aria-controls="panel"
+                data-f="all"
+              >
+                All
+              </button>
+              <button
+                class="t-nav"
+                role="tab"
+                aria-selected="false"
+                aria-controls="panel"
+                tabindex="-1"
+                data-f="todo"
+              >
+                To do
+              </button>
+              <button
+                class="t-nav"
+                role="tab"
+                aria-selected="false"
+                aria-controls="panel"
+                tabindex="-1"
+                data-f="done"
+              >
+                Done today
+              </button>
+            </div>
+            <button class="key" data-shift="1" tabindex="-1" aria-label="Next tab (E)">E</button>
           </div>
+          <div class="points" data-points></div>
+          <button class="iconbtn" id="tSet" aria-label="Settings">
+            <span class="ms" aria-hidden="true">settings</span>
+          </button>
           <button
             class="iconbtn density"
             id="density"
@@ -79,11 +97,17 @@
             <span class="ms" aria-hidden="true">view_agenda</span>
           </button>
         </header>
-        <section class="content" aria-live="polite">
+        <section class="content" id="panel" role="tabpanel">
           <div class="grid" id="grid"></div>
           <div class="empty" id="empty" hidden></div>
         </section>
       </main>
+    </div>
+
+    <div class="legend" aria-hidden="true">
+      <span>Complete <i class="key">Hold Space</i></span>
+      <span>New quest <i class="key">N</i></span>
+      <span>Tabs <i class="key">Q</i><i class="key">E</i></span>
     </div>
 
     <div class="dock">
@@ -99,7 +123,7 @@
         aria-modal="true"
         aria-labelledby="sheetT"
       >
-        <h2 id="sheetT">New quest</h2>
+        <h2 id="sheetT" tabindex="-1">New quest</h2>
         <p class="lede" id="sheetL">Keep it tiny: one step you can do in 1 to 8 minutes.</p>
         <div class="field">
           <label class="lbl" for="fName">Name</label>
@@ -144,6 +168,29 @@
       </form>
     </div>
 
+    <div class="overlay" id="setO">
+      <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="setT">
+        <h2 id="setT" tabindex="-1">Settings</h2>
+        <p class="lede">Turn effects down whenever they're too much.</p>
+        <div class="field toggles" id="setList">
+          <button type="button" class="toggle" role="switch" data-s="sound">
+            <span>Sound effects</span><i></i>
+          </button>
+          <button type="button" class="toggle" role="switch" data-s="click">
+            <span>Button clicks</span><i></i>
+          </button>
+          <button type="button" class="toggle" role="switch" data-s="vibe">
+            <span>Vibration</span><i></i>
+          </button>
+          <button type="button" class="toggle" role="switch" data-s="fx">
+            <span>Confetti</span><i></i>
+          </button>
+          <button type="button" class="toggle" data-s="bg"><span>Background</span><i></i></button>
+        </div>
+        <div class="row"><button type="button" class="btn" id="setDone">Done</button></div>
+      </div>
+    </div>
+
     <div class="snack" id="snack" role="status">
       <p id="snackT"></p>
       <button type="button" id="snackU">Undo</button>
@@ -156,6 +203,8 @@
       </div>
     </div>
 
+    <script src="js/settings.js"></script>
+    <script src="js/background.js"></script>
     <script src="js/icons.js"></script>
     <script src="js/sound.js"></script>
     <script src="js/app.js"></script>

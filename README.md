@@ -1,6 +1,6 @@
 # Side Quests
 
-A to-do app that works like a game. Each task is a **quest**: one small step you can do in about a minute, like "put on shoes" or "drink a glass of water". Each time you do it, tap **Complete**. You get a sound, a little buzz and a burst of confetti, and the quest moves toward its next level.
+A to-do app that works like a game. Each task is a **quest**: one small step you can do in about a minute, like "put on shoes" or "drink a glass of water". Each time you do it, press and hold **Complete**. You get a sound, a little buzz and a burst of confetti, and the quest moves toward its next level.
 
 It's made for brains that struggle to start things, including ADHD, autistic and other neurodivergent brains. Most to-do apps reward you for finishing big things. Side Quests rewards you for starting small things, and it rewards you right away and every time.
 
@@ -12,7 +12,7 @@ It's made for brains that struggle to start things, including ADHD, autistic and
 - **Levels instead of checkboxes.** Quests don't disappear when you do them. They level up, so a habit you repeat keeps building a visible record.
 - **You choose the pace.** A quest levels up every 3, 5 or 10 completions. After that, each level needs a little more than the last.
 - **Nothing punishes you.** There are no streaks to break, no overdue items and no red badges. "Done today" resets each day and your levels stay. Missing a day, or a week, costs you nothing.
-- **Mistakes are easy to fix.** Every completion and delete can be undone for 5 seconds. You can also correct the count from the edit screen.
+- **Mistakes are easy to fix.** Every completion and delete can be undone for 9 seconds. You can also correct the count from the edit screen.
 
 ## Install it on your phone
 

@@ -8,7 +8,7 @@ The only source of truth about the program. Each fact is short, atomic and verif
 - Markup is in `index.html`.
 - Styles are in `css/styles.css`.
 - Font faces are in `css/fonts.css`.
-- Scripts are classic scripts in `js/`, loaded in order: `icons.js`, `sound.js`, `app.js`, `effects.js`.
+- Scripts are classic scripts in `js/`, loaded in order: `settings.js`, `background.js`, `icons.js`, `sound.js`, `app.js`, `effects.js`.
 - Font files are in `fonts/`.
 - Code is formatted with Prettier at print width 100.
 - The app has no build step.
@@ -21,7 +21,7 @@ The only source of truth about the program. Each fact is short, atomic and verif
 - The service worker is network-first.
 - The service worker falls back to cache when offline.
 - The service worker caches Google Fonts responses.
-- The service worker cache name is `sq-v9`.
+- The service worker cache name is `sq-v20`.
 - The service worker precaches every app file.
 - `netlify.toml` publishes the folder with no build.
 - `sw.js` is served with `Cache-Control: no-cache`.
@@ -35,6 +35,7 @@ The only source of truth about the program. Each fact is short, atomic and verif
 - A quest has `id`, `name`, `icon`, `base`, `count` and `log`.
 - A quest's `log` keeps at most 500 entries.
 - The compact-mode preference is stored under `sidequests.compact`.
+- Settings are stored under `sidequests.settings`.
 
 ### Quests
 - A quest name is at most 40 characters.
@@ -45,29 +46,77 @@ The only source of truth about the program. Each fact is short, atomic and verif
 - New quests appear first in the list.
 - The edit screen can change a quest's completion count.
 - There are 68 quest icons.
-- The icon picker has even 8px gaps.
+- The icon picker has 8px row gaps and 10px column gaps.
 - The icon picker shows 4.5 rows and scrolls.
 - Editing a quest scrolls the icon picker to its icon.
 
 ### Views
 - The tabs are All, To do and Done today.
 - "Done today" counts completions with today's date.
-- The sidebar shows completions today.
-- The sidebar shows all-time completions.
+- A points counter shows all-time completions in Pricedown.
+- The points counter shows completions today below the total.
+- The points counter is top right on desktop and in the phone header.
+- Tabs sit centred between Q and E chips on desktop.
+- Q and E switch tabs.
+- Arrow keys move between tabs.
+- On desktop, Q and E switch tabs.
+- On desktop, N opens a new quest.
+- A shortcut legend shows bottom right on desktop only.
+- A quest done today shows a mint "Done" pill.
+- The pill shows "×N" when done more than once today.
+- A quest done today has a mint ring around its icon.
+- Under each quest icon is how many completions remain to the next level.
+- The progress bar is 6px tall.
+- The phone header shows no clock.
+- Settings open from the sidebar on desktop and a gear in the top bar on phones.
 - Compact mode shows each quest as one row.
 - In compact mode, tapping a quest name opens its edit screen.
 - Layout switches to phone mode at 820px wide or less.
 
 ### Feedback
+- Completing a quest needs a 450ms hold.
+- While holding, a pink ring closes around the check; it is the button's only animation.
+- In compact view, Complete is a round white glyph whose grey ring fills white, as in `hold-button-reference.png`.
+- Releasing early cancels and shows "Hold it".
+- Space or Enter can be held on a focused Complete button.
+- Complete is locked for 900ms after completing.
 - Completing a quest plays a ding.
 - Completing a quest vibrates the phone.
 - Completing a quest bursts confetti from the button.
 - Levelling up plays a fanfare.
-- Levelling up shows a full-width "Level N" banner.
+- Levelling up shows a full-width "Level N" banner for 1.5 seconds.
+- The level-up banner does not dim the screen.
 - Every button except Complete plays a console click.
-- Completions can be undone for 5 seconds.
-- Deletes can be undone for 5 seconds.
+- Completions can be undone for 9 seconds.
+- Deletes can be undone for 9 seconds.
 - Reduced-motion users get no confetti.
+- Reduced-motion users get no vibration.
+- Settings can turn off sound effects, button clicks, vibration and confetti.
+- Settings choose the background: Map, Sunset or Plain.
+- The default background is Map.
+- The Map background is a dim, seeded city map drawn on a canvas.
+- Map colours are exact hexes sampled from a GTA VI map close-up: blocks `#12152f`, streets `#66677d`, main roads `#828197`, open land `#275a58`, buildings `#4c5980`/`#4b4983`/`#535e8d`, highway `#fdffff` with `#536e73` glow.
+- Built-up districts are rounded navy blocks separated by light streets, with small buildings inside.
+- Open districts are green land with a few buildings.
+- The map has parks, arterial roads, a coast, a river, cased highways, square markers and a vignette.
+- The map has no text labels.
+- Map markers are 6px rounded squares in `#ddbabb`, `#9099d7` or `#9dcfa3`, outlined in `#3f394a`.
+- Map markers sit only on city blocks.
+- The map canvas is shown at 70% opacity.
+- The Sunset background is pure CSS: five soft radial colour pools and a faint conic sweep over a dusk linear gradient.
+- Quest cards are translucent with a 14px backdrop blur.
+- The points counter digits are nudged up 0.08em to centre Pricedown optically.
+- Holding Complete with a mouse does not select its label.
+- The map looks the same on every visit.
+- On desktop, Settings and the compact toggle sit together at the bottom of the sidebar.
+- On desktop, the top right shows only the points counter.
+- On phones, the compact toggle is in the top bar.
+- Settings show values as "‹ On ›" and "‹ Off ›".
+- Closing the new-quest sheet without saving keeps the typed name for next time.
+- Cancel clears the new-quest draft.
+- Sheets trap keyboard focus.
+- Opening a sheet moves focus into it.
+- The quest list is not an ARIA live region.
 - The app has no streaks.
 - The app has no overdue states.
 
@@ -79,6 +128,10 @@ The only source of truth about the program. Each fact is short, atomic and verif
 - Icon optical size is 20, or 24 in the icon picker.
 - Icons load as a Google Fonts subset of only the icons used.
 - The theme is dark only.
+- Chrome colours are sampled from `ui-reference.png`: surface `#1c1c27`, page `#12131b`, pink `#eb66a2`.
+- The logo sits on a sunset gradient band.
+- The desktop sidebar is solid dark chrome with no diagonal seam.
+- The phone header is a flat sunset band with no slanted edge.
 - The display fonts are Pricedown, Barlow and Barlow Condensed.
 
 ## Decisions
@@ -117,12 +170,88 @@ Grew from 16 to 68 icons covering hygiene, chores, food, health, movement, sleep
 ### 2026-11-20 — Netlify headers
 `netlify.toml` publishes the folder as-is and serves `sw.js` and the manifest with `Cache-Control: no-cache`, so updates reach installed apps. Facts: Netlify config, no-cache headers.
 
+### 2026-11-20 — Rule: rewards stay in the background
+The app is an extension of your life. It adds some dopamine, but it never pulls focus away from doing things. Celebrations stay short and don't block the screen. Level-up is now 1.5 seconds with no screen dim. Facts: level-up duration, no dim.
+
+### 2026-11-20 — Hold to complete
+Complete now needs a short hold (450ms). It adds intention, and it stops double taps from counting twice. A pink ring closes around the check while the button fills, modelled on game hold prompts. No official GTA VI documentation of the hold visual was found; the ring is a common game convention. Complete is locked for 900ms after completing. The loud Complete button style is intentional and stays.
+
+### 2026-11-20 — Done-today signifier
+Quests can be done more than once, so done quests aren't dimmed. A mint pill ("Done", "Done ×2") and a mint icon ring mark quests done at least once today. Mint comes from the green pill in `ui-reference.png`. "Not done yet today" was removed.
+
+### 2026-11-20 — Points counter, legend, tabs
+- The sidebar summary (hard to read on the sunset glow) is replaced by a points counter in Pricedown, like the money counter.
+- Tabs are centred between working Q/E chips.
+- Desktop shortcuts with a bottom-right legend.
+- A waypoint-style "N to Lv X" line under each icon replaces the meta row.
+- The progress bar is thicker.
+- The phone header is shorter and has no clock.
+
+### 2026-11-20 — Settings, safety and accessibility
+- Settings sheet for sound, clicks, vibration, confetti and compact view. No mute button on the main screen.
+- Undo lasts 9 seconds.
+- New-quest drafts survive accidental closes.
+- Sheets move focus in and trap it.
+- Tabs support arrow keys.
+- The list is no longer re-announced on every change.
+- Input borders have more contrast.
+
+### 2026-11-20 — Polish pass
+- On desktop the points counter sits on one line in the top bar ("10 today 8").
+- On phones the undo bar slides behind the dock instead of across it.
+- The "Level" label uses the condensed uppercase style, like the other small labels.
+- The name field's placeholder contrast is raised to 4.9:1.
+- Page scrollbars use the app's colours.
+Cache bumped to `sq-v11`.
+
+### 2026-11-20 — One hold animation, cleaner sidebar, reference colours
+- Complete had a face fill, ring, pink bar and cyan flash. Now only the ring animates, and a full ring means done. Confetti and sound stay as the reward.
+- Compact Complete copies GTA VI's hold glyph: a white disc with a grey ring that fills white.
+- The palette moved from saturated indigo to the reference's neutral blue-charcoal chrome and softer pink. Selected tiles are flatter and lighter, like the reference.
+- The sidebar's glow blob and diagonal seam are gone. The sunset now lives only in a band behind the logo, on desktop and phone.
+Cache bumped to `sq-v12`.
+
+### 2026-11-20 — Backgrounds, settings placement, top right
+- Without a map the content area felt empty. Added backgrounds in Settings: **Map** (default), a dim procedural city in the reference's map colours with districts, parks, coast, river and highways; **Sunset**, a dusk gradient; **Plain**. All are kept dim so they don't pull focus.
+- On desktop, Settings moved to the bottom of the sidebar, apart from the quest actions.
+- The top right belongs to the points counter, like the money in GTA. The compact toggle left the desktop top bar; it stays in Settings, and in the phone top bar.
+Cache bumped to `sq-v13`.
+
+### 2026-11-20 — Better map and sunset, blurred cards, compact toggle by Settings
+- The first map looked crude. The new one has smooth district shapes filled with city blocks, smooth coast and river edges, cased highways, faint POI blips and a vignette. Colours still come from the reference.
+- The sunset now has a warm horizon glow under a violet sky, with more gradient stops.
+- Cards are translucent with a backdrop blur, like the reference's info panel.
+- The compact toggle moved out of Settings to sit beside it at the bottom of the sidebar.
+- Pricedown digits are optically centred.
+- Holding Complete no longer selects its label text.
+Cache bumped to `sq-v14`.
+
+### 2026-11-20 — Map closer to the reference, sunset as a scene
+- The map now draws like the reference without copying it: two land types (violet built-up, teal-green open), uneven building footprints, brighter highways, small square markers and faint made-up district names. It's still zoomed in, so it never gets busy.
+- The sunset is now a drawn scene instead of a single gradient: layered sky, a warm glow, thin cloud streaks, a sun cut by widening bands sinking behind a city skyline with a few lit windows, and its broken reflection on the water. The colours are unchanged.
+Cache bumped to `sq-v15`.
+
+### 2026-11-20 — Removed map place names
+The faint district names looked bad, so the map has no text now.
+
+### 2026-11-20 — Sunset back to a gradient
+The drawn sunset scene went further than asked. Sunset is now a layered CSS gradient: warm pools rising from the bottom right, violet settling top left, over a dusk base. Same colours, more depth than a single linear fade.
+
+### 2026-11-20 — Bigger map markers
+Markers grew from 3–4px to 5–6px, with 1.5px rounded corners and a dark outline so they read as map icons.
+
+### 2026-11-20 — Exact map colours
+The map uses exact colours sampled from the user's GTA VI map close-up. City blocks are now navy rounded blocks with light streets between them, like the reference. Markers use the reference's peach, periwinkle and mint with its dark outline, and only sit on blocks (some had landed in water). The vignette still darkens the edges.
+
+### 2026-11-20 — Dimmer map
+The whole map canvas is shown at 70% opacity so it pulls less attention. Individual colours are unchanged.
+
 ### Open
 **Accepted, to build**
 - Export/import JSON backup and `navigator.storage.persist()`. This is the biggest data-loss risk.
-- Settings for sound, vibration and confetti intensity.
 - "Pick one for me" random quest button.
 - Reorder and pin quests; time-of-day groups.
+- Desktop sidebar as a narrow icon column for categories or time-of-day groups (waits on groups existing).
 
 **Maybe**
 - Statistics: how many quests were done (per day, week, all time).
@@ -134,3 +263,4 @@ Grew from 16 to 68 icons covering hygiene, chores, food, health, movement, sleep
 **Pinned for later**
 - Themes, unlocked by levels. A plain calm theme is unlikely.
 - Unlockable sounds and sound customisation.
+- Guess a new quest's icon from its name.

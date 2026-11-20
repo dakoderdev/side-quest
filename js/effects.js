@@ -7,7 +7,7 @@ function levelUp(t, lv) {
   void el.offsetWidth;
   el.classList.add("show");
   clearTimeout(levelUp.t);
-  levelUp.t = setTimeout(() => el.classList.remove("show"), 2500);
+  levelUp.t = setTimeout(() => el.classList.remove("show"), 1500);
 }
 
 /* particles */
@@ -24,7 +24,7 @@ size();
 addEventListener("resize", size);
 const COLS = ["#ff2d8a", "#3be8e2", "#f4f2fb"];
 function burst(x, y, n, big) {
-  if (matchMedia("(prefers-reduced-motion:reduce)").matches) return;
+  if (!SET.fx || reducedMotion()) return;
   for (let i = 0; i < n; i++) {
     const a = big ? Math.random() * Math.PI * 2 : -Math.PI / 2 + (Math.random() - 0.5) * 2.2,
       s = (big ? 3 : 2) + Math.random() * (big ? 7 : 4);

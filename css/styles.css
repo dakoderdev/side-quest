@@ -1,17 +1,25 @@
 :root {
   /* surfaces */
-  --bg: #1c1e4f;
-  --surface: #15163a;
-  --sunken: #24275f;
-  --hairline: #30347a;
+  /* Sampled from ui-reference.png: neutral blue-charcoal chrome over a darker world. */
+  --bg: #12131b;
+  --surface: #1c1c27;
+  --sunken: #282937;
+  --sunken-hi: #323342;
+  --hairline: #34354a;
   /* text */
-  --text: #f4f2fb;
-  --text-2: #b4b6dc;
-  --text-3: #8b8ec2;
+  --text: #f5f5f7;
+  --text-2: #b5b4be;
+  --text-3: #8d8c9a;
   /* accents: pink = selection/brand, cyan = progress/success */
-  --pink: #ff2d8a;
+  --pink: #eb66a2;
   --cyan: #3be8e2;
-  --face: radial-gradient(140% 160% at 0% 0%, #fbfbfd 0%, #ededf1 38%, #9d9da3 72%, #54545c 100%);
+  /* mint = "done today" (from the reference's green pill) */
+  --mint: #56d99a;
+  --on-mint: #03261a;
+  --border: #5d5e74;
+  /* Sunset band behind the logo (GTA VI key-art dusk). */
+  --sunset: linear-gradient(180deg, #2a1838 0%, #5b2346 58%, #a8434b 100%);
+  --face: linear-gradient(160deg, #ffffff 0%, #ececef 55%, #d6d6db 100%);
   --face-ring:
     inset 0 0 0 1.5px rgba(126, 126, 138, 0.55), inset 0 1px 0 1.5px rgba(255, 255, 255, 0.5);
   --on-face: #000;
@@ -39,6 +47,7 @@
 }
 html {
   -webkit-text-size-adjust: 100%;
+  scrollbar-color: var(--hairline) var(--bg);
 }
 body {
   font: 400 16px/1.45 var(--sans);
@@ -125,12 +134,9 @@ button {
   position: relative;
   display: flex;
   flex-direction: column;
-  padding: var(--s6) 0 var(--s5);
-  padding-top: calc(var(--s6) + env(safe-area-inset-top));
-  background:
-    radial-gradient(120% 55% at 70% 108%, #f4a259 0, #d65e3a 24%, #873551 48%, transparent 72%),
-    linear-gradient(#2b1838, #46213f);
-  box-shadow: inset 0 2px 0 var(--pink);
+  padding-bottom: var(--s5);
+  background: var(--surface);
+  box-shadow: inset -1px 0 0 var(--hairline);
 }
 .logo {
   font:
@@ -138,7 +144,8 @@ button {
     var(--cond);
   letter-spacing: 0.02em;
   color: #fff;
-  padding: 0 var(--s6) var(--s6);
+  padding: calc(var(--s6) + env(safe-area-inset-top)) var(--s6) var(--s6);
+  background: var(--sunset);
   -webkit-text-stroke: 5px #1d0030;
   paint-order: stroke fill;
   text-shadow:
@@ -153,41 +160,53 @@ button {
   display: none;
 }
 .menu {
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: var(--s2);
-  padding-left: var(--s5);
+  padding: var(--s5) var(--s5) 0 calc(var(--s5) + var(--bar-reach));
 }
-.summary {
-  margin-top: auto;
-  padding: 0 64px 0 var(--s6);
+/* Points counter: all-time completions in Pricedown, like the money counter. */
+.points {
   display: grid;
-  gap: var(--s1);
-  font-size: 15px;
-  color: #f0dce6;
+  justify-items: end;
+  line-height: 1;
 }
-.summary b {
-  font-weight: 500;
+.points b {
+  display: inline-block;
+  font:
+    400 28px/0.9 "Pricedown",
+    var(--cond);
   color: #fff;
+  -webkit-text-stroke: 4px #1d0030;
+  paint-order: stroke fill;
+  text-shadow: 0 2px 0 #1d0030;
+  /* Pricedown's digits sit low in their line box; nudge them up to centre optically. */
+  transform: translateY(-0.08em);
 }
-.seam {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 280px;
-  width: 44px;
-  margin-left: -44px;
-  pointer-events: none;
-  z-index: 2;
+.points b.bump {
+  animation: bump 0.5s var(--ease);
 }
-.seam svg,
-.mseam {
-  display: block;
-  width: 100%;
-  height: 100%;
+.points span {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--text-2);
 }
-.mseam {
+.side .points {
   display: none;
+}
+/* In the 56px top bar the counter reads on one line: "10 today  8". */
+.top .points {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+}
+.top .points b {
+  font-size: 40px;
+}
+.top .points span {
+  order: -1;
+  margin: 0;
 }
 
 .main {
@@ -204,11 +223,28 @@ button {
   background: var(--surface);
 }
 .key {
-  font: 700 12px/1 var(--cond);
+  font: 700 13px/1 var(--cond);
+  font-style: normal;
   padding: 3px 5px;
   border: 1.5px solid var(--text-2);
   color: var(--text-2);
   border-radius: 4px;
+}
+button.key:hover {
+  color: var(--text);
+  border-color: var(--text);
+}
+/* Tabs centred between the Q/E bumpers, as in the reference. */
+.tabbar {
+  display: flex;
+  align-items: center;
+  gap: var(--s5);
+  margin: 0 auto;
+  align-self: stretch;
+}
+#tSet,
+#density {
+  display: none; /* desktop: the top right belongs to the points counter; both live in Settings */
 }
 .tabs {
   display: flex;
@@ -274,7 +310,7 @@ button {
   color: var(--text);
 }
 .btn.quiet:hover {
-  background: #2c3070;
+  background: var(--sunken-hi);
 }
 @media (hover: hover) {
   .btn:hover::before {
@@ -284,15 +320,6 @@ button {
 .btn:active::before,
 .btn:focus-visible::before {
   transform: none;
-}
-.btn.hit {
-  background: var(--cyan);
-  box-shadow: inset 0 0 0 1.5px rgba(0, 60, 60, 0.25);
-  color: #06222a;
-}
-.btn.hit::before {
-  transform: none;
-  background: var(--cyan);
 }
 
 .iconbtn {
@@ -337,7 +364,8 @@ button {
   transform: none;
 }
 
-.menu .sel {
+.menu .sel,
+.side-foot .sel {
   display: flex;
   align-items: center;
   gap: var(--s3);
@@ -345,9 +373,10 @@ button {
   padding: 0 var(--s4);
   font-size: 18px;
   text-align: left;
-  border-radius: 2px 0 0 2px;
+  border-radius: 2px;
 }
-.menu .sel .ms {
+.menu .sel .ms,
+.side-foot .sel .ms {
   --ms: 20px;
 }
 
@@ -367,6 +396,19 @@ button {
   align-items: center;
   gap: var(--s4);
 }
+.blip {
+  flex: none;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+}
+.blip small {
+  font: 700 13px/1 var(--cond);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--text-2);
+}
 .pin {
   flex: none;
   width: 40px;
@@ -378,6 +420,11 @@ button {
   box-shadow:
     0 0 0 3px var(--surface),
     0 0 0 5px var(--pink);
+}
+.card.done .pin {
+  box-shadow:
+    0 0 0 3px var(--surface),
+    0 0 0 5px var(--mint);
 }
 .pin .ms {
   --ms: 22px;
@@ -391,8 +438,20 @@ button {
   overflow-wrap: anywhere;
 }
 .ttl p {
-  margin-top: 2px;
-  color: var(--text-2);
+  margin-top: 6px;
+}
+.ttl p:empty {
+  display: none;
+}
+.done-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 2px;
+  background: var(--mint);
+  color: var(--on-mint);
+  font: 700 14px/1.3 var(--cond);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 .lv {
   flex: none;
@@ -401,8 +460,10 @@ button {
 }
 .lv span {
   display: block;
-  font-size: 13px;
-  color: var(--text-3);
+  font: 700 13px/1 var(--cond);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-2);
 }
 .lv b {
   display: block;
@@ -414,16 +475,16 @@ button {
   margin-top: var(--s5);
 }
 .track {
-  height: 4px;
+  height: 6px;
   background: var(--sunken);
-  border-radius: 2px;
+  border-radius: 3px;
   overflow: hidden;
 }
 .track i {
   display: block;
   height: 100%;
   background: var(--cyan);
-  border-radius: 2px;
+  border-radius: 3px;
   transition: width 0.6s var(--ease);
 }
 .meta {
@@ -440,6 +501,41 @@ button {
 }
 .actions .btn {
   flex: 1;
+}
+/* Hold to complete. The only animation is a ring closing around the check, as in GTA VI's hold prompts. */
+.btn[data-done] {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none; /* holding with a mouse must not select the label */
+}
+.btn[data-done] > span {
+  position: relative;
+}
+.btn[data-done]::before {
+  display: none; /* no pink bar on Complete: the ring is its only motion */
+}
+.ring {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  margin-left: -4px;
+}
+.ring::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(var(--pink) calc(var(--p, 0) * 1turn), rgba(0, 0, 0, 0.2) 0);
+  -webkit-mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - 3px),
+    #000 calc(100% - 2.5px)
+  );
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2.5px));
+}
+.btn.hit .ring::before {
+  background: var(--pink);
 }
 .lv b.bump {
   animation: bump 0.5s var(--ease);
@@ -468,7 +564,7 @@ button {
   z-index: 20;
   display: none;
   place-items: center;
-  background: rgba(9, 9, 28, 0.66);
+  background: rgba(6, 6, 12, 0.7);
 }
 .overlay.show {
   display: grid;
@@ -508,15 +604,55 @@ button {
   font-size: 17px;
   color: var(--text);
   background: var(--sunken);
-  border: 1px solid var(--hairline);
+  border: 1px solid var(--border);
   border-radius: 2px;
 }
 .field input::placeholder {
-  color: var(--text-3);
+  color: #9497cb; /* 4.9:1 on --sunken; --text-3 was 4.4:1 */
 }
 .field input:focus {
   border-color: var(--cyan);
   outline: none;
+  box-shadow: inset 0 0 0 1px var(--cyan);
+}
+.sheet h2:focus {
+  outline: none;
+}
+
+/* Settings: GTA-style "‹ ON ›" values instead of phone switches. */
+.toggles {
+  display: grid;
+  gap: var(--s1);
+}
+.toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 52px;
+  padding: 0 var(--s4);
+  background: var(--sunken);
+  font-size: 17px;
+  text-align: left;
+  border-radius: 2px;
+}
+.toggle:hover {
+  background: var(--sunken-hi);
+}
+.toggle i {
+  font: 700 17px/1 var(--cond);
+  font-style: normal;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.toggle i::after {
+  content: "‹ Off ›";
+}
+.toggle[aria-checked="true"] i {
+  color: var(--mint);
+}
+.toggle[aria-checked="true"] i::after {
+  content: "‹ On ›";
 }
 .choices {
   display: grid;
@@ -586,7 +722,7 @@ button {
   color: var(--text);
 }
 .stepper .iconbtn:hover {
-  background: #2c3070;
+  background: var(--sunken-hi);
 }
 .stepper output {
   min-width: 64px;
@@ -617,14 +753,14 @@ button {
   position: fixed;
   left: 50%;
   bottom: calc(var(--s5) + env(safe-area-inset-bottom));
-  z-index: 30;
+  z-index: 15; /* below sheets, above the dock */
   display: flex;
   align-items: center;
   gap: var(--s4);
   width: max-content;
   max-width: min(460px, calc(100vw - 32px));
   padding: var(--s1) var(--s1) var(--s1) var(--s4);
-  background: #0f1030;
+  background: #0c0d14;
   box-shadow:
     inset 0 0 0 1px var(--hairline),
     0 14px 30px -10px rgba(0, 0, 0, 0.7);
@@ -673,13 +809,6 @@ button {
 .lvup.show {
   visibility: visible;
 }
-.lvup::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(8, 8, 26, 0.62);
-  opacity: 0;
-}
 .band {
   position: relative;
   width: 100%;
@@ -694,11 +823,8 @@ button {
     transparent
   );
 }
-.lvup.show::before {
-  animation: fade 2.4s ease forwards;
-}
 .lvup.show .band {
-  animation: band 2.4s var(--ease) forwards;
+  animation: band 1.5s var(--ease) forwards;
 }
 .band h2 {
   font: 700 72px/1 var(--cond);
@@ -710,21 +836,12 @@ button {
   margin-top: var(--s2);
   font-size: 17px;
 }
-@keyframes fade {
-  12%,
-  80% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
-}
 @keyframes band {
   0% {
     opacity: 0;
     clip-path: inset(50% 0);
   }
-  12% {
+  15% {
     opacity: 1;
     clip-path: inset(0);
   }
@@ -737,9 +854,6 @@ button {
 }
 
 /* ---------- compact mode ---------- */
-.density {
-  margin-left: auto;
-}
 .iconbtn[aria-pressed="true"] {
   color: var(--pink);
 }
@@ -758,13 +872,23 @@ button {
 .compact .actions {
   display: contents;
 }
-.compact .pin {
+.compact .blip {
   grid-row: 1/3;
+}
+.compact .blip small {
+  display: none;
+}
+.compact .pin {
   width: 32px;
   height: 32px;
   box-shadow:
     0 0 0 2px var(--surface),
     0 0 0 3.5px var(--pink);
+}
+.compact .card.done .pin {
+  box-shadow:
+    0 0 0 2px var(--surface),
+    0 0 0 3.5px var(--mint);
 }
 .compact .pin .ms {
   --ms: 18px;
@@ -783,7 +907,7 @@ button {
 .compact .meta,
 .compact .lv span,
 .compact [data-edit],
-.compact [data-done] span:not(.ms) {
+.compact [data-done] .bt {
   display: none;
 }
 .compact .prog {
@@ -805,6 +929,102 @@ button {
   padding: 0 var(--s3);
   margin-left: var(--bar-reach);
 }
+.compact .btn[data-done] {
+  width: 48px;
+  min-height: 48px;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+}
+.compact .btn[data-done]::before {
+  display: none;
+}
+.compact .ring {
+  width: 40px;
+  height: 40px;
+  margin: 0;
+}
+.compact .ring::before {
+  background: conic-gradient(#fff calc(var(--p, 0) * 1turn), rgba(255, 255, 255, 0.3) 0);
+  -webkit-mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - 4px),
+    #000 calc(100% - 3.5px)
+  );
+  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3.5px));
+}
+.compact .btn.hit .ring::before {
+  background: #fff;
+}
+.compact .ring .ms {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #fff;
+  color: #111;
+  --ms: 20px;
+  --grad: 0;
+}
+/* Settings sits alone at the bottom of the sidebar, away from the quest actions. */
+/* Settings and the compact toggle share the bottom of the sidebar, away from the quest actions. */
+.side-foot {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: var(--s5) var(--s5) 0 calc(var(--s5) + var(--bar-reach));
+}
+.side-foot .sel {
+  flex: 1;
+}
+/* Backgrounds (Settings → Background). */
+canvas#bgmap {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+}
+/* Map is drawn on the canvas (js/background.js). */
+body[data-bg="map"] canvas#bgmap {
+  display: block;
+  opacity: 0.7; /* whole map dimmed so it stays background; colours stay exact */
+}
+/* Sunset: a mesh of soft colour pools layered over a dusk base, so it reads as depth,
+   not one flat fade. Warm light rises from the bottom right; violet settles top left. */
+body[data-bg="sunset"] {
+  background:
+    radial-gradient(60% 45% at 78% 100%, rgba(255, 168, 118, 0.42) 0%, rgba(255, 168, 118, 0) 70%),
+    radial-gradient(70% 55% at 55% 105%, rgba(235, 102, 162, 0.38) 0%, rgba(235, 102, 162, 0) 72%),
+    radial-gradient(45% 40% at 18% 92%, rgba(170, 70, 160, 0.3) 0%, rgba(170, 70, 160, 0) 70%),
+    radial-gradient(55% 45% at 92% 38%, rgba(120, 60, 150, 0.22) 0%, rgba(120, 60, 150, 0) 70%),
+    radial-gradient(60% 50% at 8% 8%, rgba(70, 50, 140, 0.28) 0%, rgba(70, 50, 140, 0) 70%),
+    conic-gradient(
+      from 200deg at 70% 110%,
+      rgba(255, 140, 120, 0.08),
+      rgba(120, 60, 150, 0.05),
+      rgba(255, 140, 120, 0.08)
+    ),
+    linear-gradient(180deg, #11121a 0%, #15142a 40%, #21173a 70%, #33193f 100%);
+  background-attachment: fixed;
+}
+.app {
+  position: relative;
+}
+/* Cards float over the background like the reference's info panel. */
+/* Cards float over the background like the reference's info panel: translucent with a blur. */
+.card {
+  background: rgba(28, 28, 39, 0.78);
+  -webkit-backdrop-filter: blur(8px) saturate(1.2);
+  backdrop-filter: blur(8px) saturate(1.2);
+}
+.toggle[data-s="bg"] i {
+  color: var(--text);
+}
+.toggle[data-s="bg"] i::after {
+  content: none;
+}
 canvas#fx {
   position: fixed;
   inset: 0;
@@ -813,6 +1033,32 @@ canvas#fx {
 }
 .dock {
   display: none;
+}
+/* Shortcut legend, like the reference's controller prompts. Desktop only. */
+.legend {
+  position: fixed;
+  right: var(--s6);
+  bottom: var(--s5);
+  z-index: 4;
+  display: grid;
+  justify-items: end;
+  gap: var(--s2);
+  font: 700 16px/1 var(--cond);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+.legend span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.legend .key {
+  color: var(--text);
+  border-color: var(--text);
+}
+.content {
+  padding-bottom: 140px;
 }
 
 /* ---------- phone ---------- */
@@ -829,45 +1075,52 @@ canvas#fx {
     grid-template-columns: 1fr;
     grid-template-rows: auto 1fr;
   }
-  .seam,
   .menu,
+  .side-foot,
+  .legend,
   .top .clock,
-  .top .key {
+  .top .key,
+  .top .points {
     display: none;
+  }
+  .tabbar {
+    margin: 0;
+  }
+  .top {
+    gap: 0;
+  }
+  .tabs button {
+    white-space: nowrap;
+  }
+  #tSet {
+    display: inline-grid;
+    margin-left: auto;
+  }
+  #density {
+    display: inline-grid;
   }
   .side {
     display: grid;
     grid-template-columns: 1fr auto;
-    align-items: start;
-    row-gap: var(--s4);
-    padding: calc(var(--s5) + env(safe-area-inset-top)) var(--s5) 36px;
-    background:
-      radial-gradient(100% 160% at 88% 140%, #f4a259 0, #d65e3a 22%, #873551 48%, transparent 76%),
-      linear-gradient(#2b1838, #46213f);
-    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), 0 100%);
+    align-items: center;
+    padding: calc(var(--s4) + env(safe-area-inset-top)) var(--s5) var(--s4);
+    background: var(--sunset);
+    box-shadow: none;
   }
   .logo {
-    font-size: 36px;
+    font-size: 30px;
     padding: 0;
+    background: none;
   }
-  .side .clock {
-    display: block;
-    padding-top: 2px;
+  .side .points {
+    display: grid;
   }
-  .summary {
-    grid-column: 1/-1;
-    display: flex;
-    gap: var(--s4);
-    margin: 0;
-    padding: 0;
-  }
-  .mseam {
-    display: block;
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 20px;
+  /* Dark backing keeps the small label readable over the sunset glow. */
+  .side .points span {
+    padding: 2px 6px;
+    border-radius: 2px;
+    background: rgba(29, 0, 48, 0.6);
+    color: #fff;
   }
   body::before {
     content: "";
@@ -876,7 +1129,7 @@ canvas#fx {
     right: 0;
     top: 0;
     height: env(safe-area-inset-top);
-    background: #2b1838;
+    background: #2a1838;
     z-index: 6;
   }
   .top {
@@ -885,11 +1138,11 @@ canvas#fx {
     z-index: 5;
     min-height: 52px;
     padding: 0 var(--s5);
-    background: var(--bg);
-    margin-top: -4px;
+    background: var(--surface);
+    box-shadow: inset 0 -1px 0 var(--hairline);
   }
   .tabs {
-    gap: var(--s5);
+    gap: var(--s4);
   }
   .content {
     padding: var(--s3) var(--s4) calc(112px + env(safe-area-inset-bottom));
@@ -944,6 +1197,7 @@ canvas#fx {
   }
   .snack {
     bottom: calc(92px + env(safe-area-inset-bottom));
+    z-index: 9; /* slides in and out behind the dock instead of across it */
   }
   .sheet .row {
     flex-wrap: wrap;

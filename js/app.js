@@ -36,16 +36,23 @@ function lvInfo(t) {
 }
 const times = (n) => (n === 1 ? "once" : n === 2 ? "twice" : n + " times");
 
+// Mint "done" pill: shown once a quest is done at least once today.
+const doneHTML = (d) =>
+  d
+    ? `<span class="done-pill" aria-label="Done ${times(d)} today">Done${d > 1 ? ` ×${d}` : ""}</span>`
+    : "";
+// Waypoint-style line under the blip, like "0.72 mi" on the map.
+const toGo = (L) => `${L.need - L.into} to Lv ${L.lv + 1}`;
+
 function cardHTML(t) {
   const L = lvInfo(t),
     d = doneToday(t);
-  return `<article class="card" data-id="${t.id}">
-    <div class="hd"><span class="pin">${ic(t.icon)}</span>
-      <div class="ttl"><h3 class="t-title">${esc(t.name)}</h3><p>${d ? `Done ${times(d)} today` : "Not done yet today"}</p></div>
+  return `<article class="card${d ? " done" : ""}" data-id="${t.id}">
+    <div class="hd"><span class="blip"><span class="pin">${ic(t.icon)}</span><small class="num">${toGo(L)}</small></span>
+      <div class="ttl"><h3 class="t-title">${esc(t.name)}</h3><p>${doneHTML(d)}</p></div>
       <div class="lv"><span>Level</span><b class="num">${L.lv}</b></div></div>
-    <div class="prog"><div class="track" role="progressbar" aria-label="Progress to level ${L.lv + 1}" aria-valuemin="0" aria-valuemax="${L.need}" aria-valuenow="${L.into}"><i style="width:${(L.into / L.need) * 100}%"></i></div>
-      <div class="meta t-meta num"><span>${L.into} of ${L.need} to level ${L.lv + 1}</span><span>${t.count} total</span></div></div>
-    <div class="actions"><button class="btn" data-done>${gl(P_CHECK)}<span>Complete</span></button>
+    <div class="prog"><div class="track" role="progressbar" aria-label="${toGo(L)}" aria-valuemin="0" aria-valuemax="${L.need}" aria-valuenow="${L.into}"><i style="width:${(L.into / L.need) * 100}%"></i></div></div>
+    <div class="actions"><button class="btn" data-done aria-label="Hold to complete ${esc(t.name)}"><span class="ring">${gl(P_CHECK)}</span><span class="bt">Complete</span></button>
       <button class="iconbtn" data-edit aria-label="Edit ${esc(t.name)}">${gl(P_EDIT)}</button></div>
   </article>`;
 }
@@ -59,25 +66,53 @@ function render() {
   e.hidden = !!list.length;
   if (!list.length) {
     e.innerHTML = !tasks.length
-      ? `<p>Start with something tiny, like putting on shoes or drinking a glass of water. Each time you do it, tap Complete.</p><button class="btn" data-new>${gl(P_PLUS)}New quest</button>`
+      ? `<p>Start with something tiny, like putting on shoes or drinking a glass of water. Each time you do it, press and hold Complete.</p><button class="btn" data-new>${gl(P_PLUS)}New quest</button>`
       : filter === "todo"
         ? "<p>Everything’s done for today.</p>"
         : "<p>Nothing completed yet today.</p>";
   }
+  points();
+}
+
+/* points counter (styled like the money counter) */
+let lastAll = null;
+function points() {
   const td = tasks.reduce((a, t) => a + doneToday(t), 0),
     all = tasks.reduce((a, t) => a + t.count, 0);
-  $("summary").innerHTML =
-    `<span><b>${td}</b> done today</span><span><b>${all}</b> all time</span>`;
+  document.querySelectorAll("[data-points]").forEach((n) => {
+    n.innerHTML = `<b class="num">${all}</b><span class="num">${td} today</span>`;
+    n.title = `${all} completed all time, ${td} today`;
+    if (lastAll !== null && all > lastAll) n.querySelector("b").classList.add("bump");
+  });
+  lastAll = all;
 }
 
 /* tabs */
+const tabs = [...$("tabs").children];
+function selectTab(b, focus) {
+  filter = b.dataset.f;
+  tabs.forEach((x) => {
+    x.setAttribute("aria-selected", x === b);
+    x.tabIndex = x === b ? 0 : -1;
+  });
+  if (focus) b.focus();
+  render();
+}
+const shiftTab = (d, focus) => {
+  const i = tabs.findIndex((x) => x.dataset.f === filter);
+  selectTab(tabs[(i + d + tabs.length) % tabs.length], focus);
+};
 $("tabs").onclick = (e) => {
   const b = e.target.closest("button");
-  if (!b) return;
-  filter = b.dataset.f;
-  [...$("tabs").children].forEach((x) => x.setAttribute("aria-selected", x === b));
-  render();
+  if (b) selectTab(b);
 };
+$("tabs").onkeydown = (e) => {
+  if (e.key === "ArrowRight") shiftTab(1, true);
+  else if (e.key === "ArrowLeft") shiftTab(-1, true);
+};
+document
+  .querySelectorAll("[data-shift]")
+  .forEach((k) => (k.onclick = () => shiftTab(+k.dataset.shift)));
 
 /* sheet: create + edit */
 $("fIcons").innerHTML = Object.keys(ICONS)
@@ -109,7 +144,8 @@ $("countF").onclick = (e) => {
   draftCount = Math.max(0, draftCount + +b.dataset.step);
   $("fCount").textContent = draftCount;
 };
-let lastFocus = null;
+let lastFocus = null,
+  draft = null; // unsaved new-quest input, kept if the sheet closes by accident
 function openForm(t) {
   lastFocus = document.activeElement;
   editing = t || null;
@@ -118,10 +154,10 @@ function openForm(t) {
     ? "Rename it, change the icon or pace, or fix the count."
     : "Keep it tiny: one step you can do in 1 to 8 minutes.";
   $("fSubmit").textContent = t ? "Save" : "Start quest";
-  $("fName").value = t ? t.name : "";
+  $("fName").value = t ? t.name : draft ? draft.name : "";
   $("fName").placeholder = "Put on shoes";
-  icon = t ? t.icon : "shoe";
-  pace = t ? t.base : 5;
+  icon = t ? t.icon : draft ? draft.icon : "shoe";
+  pace = t ? t.base : draft ? draft.pace : 5;
   draftCount = t ? t.count : 0;
   pickVal($("fIcons"), "k", icon);
   requestAnimationFrame(() => {
@@ -137,28 +173,67 @@ function openForm(t) {
     $("mNew").setAttribute("aria-current", "page");
     $("mQuests").removeAttribute("aria-current");
   }
-  $("overlay").classList.add("show");
-  if (matchMedia("(hover:hover)").matches && !t) setTimeout(() => $("fName").focus(), 20);
+  showSheet($("overlay"));
+  // Focus the name field only where it won't pop up a phone keyboard; otherwise the title.
+  const typing = matchMedia("(hover:hover)").matches && !t;
+  setTimeout(() => (typing ? $("fName") : $("sheetT")).focus(), 20);
 }
-function closeForm() {
+function closeForm(saved) {
+  if (!editing && saved !== true) {
+    const name = $("fName").value.trim();
+    draft = name ? { name, icon, pace } : null;
+  }
   $("mQuests").setAttribute("aria-current", "page");
   $("mNew").removeAttribute("aria-current");
-  $("overlay").classList.remove("show");
+  hideSheet($("overlay"));
   editing = null;
   lastFocus && lastFocus.focus && lastFocus.focus();
 }
 $("mNew").onclick = () => openForm();
+$("mSet").onclick = $("tSet").onclick = () => openSettings();
 $("dNew").onclick = () => openForm();
 $("mQuests").onclick = closeForm;
 $("empty").onclick = (e) => {
   if (e.target.closest("[data-new]")) openForm();
 };
-$("cancel").onclick = closeForm;
+$("cancel").onclick = () => {
+  draft = null;
+  closeForm(true);
+};
 $("overlay").onclick = (e) => {
   if (e.target === $("overlay")) closeForm();
 };
+
+/* sheets: show/hide with a simple focus trap */
+const openSheet = () => document.querySelector(".overlay.show");
+const showSheet = (o) => o.classList.add("show");
+const hideSheet = (o) => o.classList.remove("show");
 addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && $("overlay").classList.contains("show")) closeForm();
+  const o = openSheet();
+  if (o) {
+    if (e.key === "Escape") o === $("overlay") ? closeForm() : closeSettings();
+    if (e.key === "Tab") {
+      const f = [...o.querySelectorAll("button:not([hidden]),input")].filter((x) => x.offsetParent);
+      const first = f[0],
+        last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        last.focus();
+        e.preventDefault();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        first.focus();
+        e.preventDefault();
+      }
+    }
+    return;
+  }
+  // Desktop shortcuts, shown in the bottom-right legend.
+  if (e.target.matches("input") || e.metaKey || e.ctrlKey || e.altKey) return;
+  const k = e.key.toLowerCase();
+  if (k === "n") {
+    e.preventDefault();
+    openForm();
+  } else if (k === "q") shiftTab(-1);
+  else if (k === "e") shiftTab(1);
 });
 $("form").onsubmit = (e) => {
   e.preventDefault();
@@ -178,14 +253,15 @@ $("form").onsubmit = (e) => {
     if (diff > 0) for (let i = 0; i < diff; i++) t.log.push(null); // added by hand: not counted as "today"
     t.count = draftCount;
     save();
-    closeForm();
+    closeForm(true);
     render();
     blip(660, 0.06);
     return;
   }
   tasks.unshift({ id: Date.now(), name, icon, base: pace, count: 0, log: [] });
   save();
-  closeForm();
+  draft = null;
+  closeForm(true);
   if (filter === "done") $("tabs").children[0].click();
   else render();
   blip(660, 0.06);
@@ -195,7 +271,7 @@ $("fDelete").onclick = () => {
     i = tasks.indexOf(t);
   tasks.splice(i, 1);
   save();
-  closeForm();
+  closeForm(true);
   render();
   snack(`Deleted “${t.name}”`, () => {
     tasks.splice(Math.min(i, tasks.length), 0, t);
@@ -205,6 +281,7 @@ $("fDelete").onclick = () => {
 };
 
 /* undo bar */
+const UNDO_MS = 9000;
 let undoFn = null,
   snackT;
 function snack(text, fn) {
@@ -212,7 +289,7 @@ function snack(text, fn) {
   $("snackT").textContent = text;
   $("snack").classList.add("show");
   clearTimeout(snackT);
-  snackT = setTimeout(hideSnack, 5000);
+  snackT = setTimeout(hideSnack, UNDO_MS);
 }
 function hideSnack() {
   $("snack").classList.remove("show");
@@ -229,42 +306,101 @@ $("snackU").onclick = () => {
 
 /* cards */
 const buzz = (p) => {
+  if (!SET.vibe || reducedMotion()) return;
   try {
     navigator.vibrate && navigator.vibrate(p);
   } catch (e) {}
 };
-const summary = () =>
-  ($("summary").innerHTML =
-    `<span><b>${tasks.reduce((a, t) => a + doneToday(t), 0)}</b> done today</span><span><b>${tasks.reduce((a, t) => a + t.count, 0)}</b> all time</span>`);
+const taskOf = (el) => tasks.find((x) => x.id === +el.closest(".card").dataset.id);
+
 $("grid").onclick = (e) => {
   const card = e.target.closest(".card");
   if (!card) return;
-  const id = +card.dataset.id,
-    t = tasks.find((x) => x.id === id);
-  if (e.target.closest("[data-edit]") || (compact && e.target.closest(".ttl"))) {
-    openForm(t);
-    return;
+  if (e.target.closest("[data-edit]") || (compact && e.target.closest(".ttl")))
+    openForm(taskOf(card));
+};
+
+/* Hold to complete: a ring fills around the check, like a game's hold prompt.
+   Letting go early cancels. The button is locked while it shows "Done",
+   so a double tap can't count twice. */
+const HOLD_MS = 800;
+let hold = null;
+function holdStart(btn) {
+  if (hold || btn.classList.contains("hit")) return;
+  const t0 = performance.now();
+  hold = { btn, raf: 0 };
+  btn.classList.add("holding");
+  const step = (now) => {
+    const p = Math.min(1, (now - t0) / HOLD_MS);
+    btn.style.setProperty("--p", p);
+    if (p < 1) hold.raf = requestAnimationFrame(step);
+    else {
+      holdEnd(false);
+      complete(btn);
+    }
+  };
+  hold.raf = requestAnimationFrame(step);
+}
+function holdEnd(early) {
+  if (!hold) return;
+  const b = hold.btn;
+  cancelAnimationFrame(hold.raf);
+  b.classList.remove("holding");
+  b.style.removeProperty("--p");
+  hold = null;
+  if (early) {
+    const l = b.querySelector(".bt");
+    l.textContent = "Hold it";
+    clearTimeout(b.hintT);
+    b.hintT = setTimeout(() => (l.textContent = "Complete"), 1200);
   }
-  if (!e.target.closest("[data-done]")) return;
-  const before = lvInfo(t).lv;
+}
+$("grid").addEventListener("pointerdown", (e) => {
+  const b = e.target.closest("[data-done]");
+  if (b && e.button === 0) holdStart(b);
+});
+["pointerup", "pointercancel"].forEach((ev) => addEventListener(ev, () => holdEnd(true)));
+$("grid").addEventListener("pointerout", (e) => {
+  if (hold && e.target.closest("[data-done]") === hold.btn && !hold.btn.contains(e.relatedTarget))
+    holdEnd(true);
+});
+$("grid").addEventListener("contextmenu", (e) => {
+  if (e.target.closest("[data-done]")) e.preventDefault();
+});
+$("grid").addEventListener("keydown", (e) => {
+  const b = e.target.closest("[data-done]");
+  if (b && (e.key === " " || e.key === "Enter")) {
+    e.preventDefault();
+    if (!e.repeat) holdStart(b);
+  }
+});
+$("grid").addEventListener("keyup", (e) => {
+  if (e.key === " " || e.key === "Enter") holdEnd(true);
+});
+
+function complete(btn) {
+  const card = btn.closest(".card"),
+    t = taskOf(card),
+    before = lvInfo(t).lv;
   t.count++;
   t.log.push(today());
   if (t.log.length > 500) t.log = t.log.slice(-500);
   save();
-  const btn = card.querySelector("[data-done]"),
-    r = btn.getBoundingClientRect(),
+  const r = btn.getBoundingClientRect(),
     L = lvInfo(t);
   // update in place so the bar animates instead of re-rendering
-  const n = document.createElement("div");
-  n.innerHTML = cardHTML(t);
-  card.querySelector(".ttl p").textContent = n.querySelector(".ttl p").textContent;
-  card.querySelector(".meta").innerHTML = n.querySelector(".meta").innerHTML;
+  card.classList.add("done");
+  card.querySelector(".ttl p").innerHTML = doneHTML(doneToday(t));
+  card.querySelector(".blip small").textContent = toGo(L);
+  card.querySelector(".track").setAttribute("aria-valuenow", L.into);
+  card.querySelector(".track").setAttribute("aria-label", toGo(L));
   card.querySelector(".track i").style.width = (L.into / L.need) * 100 + "%";
   btn.classList.add("hit");
-  btn.querySelector("span:not(.ms)").textContent = "Done";
+  clearTimeout(btn.hintT);
+  btn.querySelector(".bt").textContent = "Done";
   setTimeout(() => {
     btn.classList.remove("hit");
-    btn.querySelector("span:not(.ms)").textContent = "Complete";
+    btn.querySelector(".bt").textContent = "Complete";
   }, 900);
   if (L.lv > before) {
     const b = card.querySelector(".lv b");
@@ -273,13 +409,13 @@ $("grid").onclick = (e) => {
     buzz([30, 60, 30, 60, 90]);
     fanfare();
     levelUp(t, L.lv);
-    burst(innerWidth / 2, innerHeight / 2, 110, true);
+    burst(r.left + r.width / 2, r.top + r.height / 2, 70, true);
   } else {
     buzz(20);
     ding();
     burst(r.left + r.width / 2, r.top + r.height / 2, 28, false);
   }
-  summary();
+  points();
   snack(`+1 ${t.name}`, () => {
     t.count = Math.max(0, t.count - 1);
     const i = t.log.lastIndexOf(today());
@@ -290,6 +426,48 @@ $("grid").onclick = (e) => {
     render();
   });
   if (filter !== "all") setTimeout(render, 950);
+}
+
+/* settings */
+function syncSettings() {
+  $("setList")
+    .querySelectorAll("[data-s]")
+    .forEach((b) => {
+      const k = b.dataset.s;
+      if (k === "bg") {
+        b.querySelector("i").textContent = `‹ ${BG_NAMES[SET.bg]} ›`;
+        b.setAttribute("aria-label", `Background: ${BG_NAMES[SET.bg]}. Change`);
+      } else b.setAttribute("aria-checked", k === "compact" ? compact : SET[k]);
+    });
+}
+function openSettings() {
+  lastFocus = document.activeElement;
+  syncSettings();
+  showSheet($("setO"));
+  setTimeout(() => $("setT").focus(), 20);
+}
+function closeSettings() {
+  hideSheet($("setO"));
+  lastFocus && lastFocus.focus && lastFocus.focus();
+}
+$("setList").onclick = (e) => {
+  const b = e.target.closest("[data-s]");
+  if (!b) return;
+  const k = b.dataset.s;
+  if (k === "compact") setDensity(!compact);
+  else if (k === "bg") {
+    SET.bg = BGS[(BGS.indexOf(SET.bg) + 1) % BGS.length];
+    saveSet();
+    applyBg();
+  } else {
+    SET[k] = !SET[k];
+    saveSet();
+  }
+  syncSettings();
+};
+$("setDone").onclick = closeSettings;
+$("setO").onclick = (e) => {
+  if (e.target === $("setO")) closeSettings();
 };
 
 /* compact mode */
@@ -302,12 +480,13 @@ function setDensity(v) {
   compact = v;
   document.body.classList.toggle("compact", v);
   $("density").setAttribute("aria-pressed", v);
+  $("sDensity").setAttribute("aria-pressed", v);
   try {
     localStorage.setItem(DKEY, v ? "1" : "0");
   } catch (e) {}
 }
 setDensity(compact);
-$("density").onclick = () => setDensity(!compact);
+$("density").onclick = $("sDensity").onclick = () => setDensity(!compact);
 /* clock */
 function clk() {
   const v = new Date()

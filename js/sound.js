@@ -1,6 +1,7 @@
 /* sound: low, warm synth hits (checkpoint-style), not a bright bell */
 let ac, noiseBuf;
 function A() {
+  if (!SET.sound) return null;
   try {
     ac = ac || new (window.AudioContext || window.webkitAudioContext)();
     if (ac.state === "suspended") ac.resume();
@@ -181,7 +182,7 @@ document.addEventListener(
   "pointerdown",
   (e) => {
     const b = e.target.closest("button");
-    if (b && !b.matches("[data-done]")) click();
+    if (b && !b.matches("[data-done]") && SET.click) click();
   },
   true,
 );
