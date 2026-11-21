@@ -417,9 +417,10 @@ button.key:hover {
   display: grid;
   place-items: center;
   background: var(--pink);
+  /* Barely-there ring by default; it turns mint once the quest is done today. */
   box-shadow:
     0 0 0 3px var(--surface),
-    0 0 0 5px var(--pink);
+    0 0 0 5px rgba(255, 255, 255, 0.07);
 }
 .card.done .pin {
   box-shadow:
@@ -486,6 +487,26 @@ button.key:hover {
   background: var(--cyan);
   border-radius: 3px;
   transition: width 0.6s var(--ease);
+}
+/* Segmented: one rounded piece per completion needed, 3px apart. */
+.track.seg {
+  display: flex;
+  gap: 3px;
+  background: none;
+  border-radius: 0;
+}
+/* Each segment fills left to right, like the bar did, when it lights up. */
+.track.seg i {
+  flex: 1;
+  background:
+    linear-gradient(var(--cyan), var(--cyan)) left / 0% 100% no-repeat,
+    var(--sunken);
+  transition: background-size 0.6s var(--ease);
+}
+.track.seg i.on {
+  background-size:
+    100% 100%,
+    auto;
 }
 .meta {
   display: flex;
@@ -620,6 +641,19 @@ button.key:hover {
 }
 
 /* Settings: GTA-style "‹ ON ›" values instead of phone switches. */
+/* Backup buttons in Settings. */
+.databtns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s2);
+}
+.databtns .btn {
+  padding: 0 var(--s3);
+  font-size: 16px;
+}
+.databtns .btn::before {
+  display: none;
+}
 .toggles {
   display: grid;
   gap: var(--s1);
@@ -883,7 +917,7 @@ button.key:hover {
   height: 32px;
   box-shadow:
     0 0 0 2px var(--surface),
-    0 0 0 3.5px var(--pink);
+    0 0 0 3.5px rgba(255, 255, 255, 0.07);
 }
 .compact .card.done .pin {
   box-shadow:
@@ -993,7 +1027,14 @@ body[data-bg="map"] canvas#bgmap {
 }
 /* Sunset: a mesh of soft colour pools layered over a dusk base, so it reads as depth,
    not one flat fade. Warm light rises from the bottom right; violet settles top left. */
-body[data-bg="sunset"] {
+/* Painted on a fixed layer instead of with background-attachment: fixed, which makes
+   phones repaint the whole gradient on every scroll frame. */
+body[data-bg="sunset"]::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
   background:
     radial-gradient(60% 45% at 78% 100%, rgba(255, 168, 118, 0.42) 0%, rgba(255, 168, 118, 0) 70%),
     radial-gradient(70% 55% at 55% 105%, rgba(235, 102, 162, 0.38) 0%, rgba(235, 102, 162, 0) 72%),
@@ -1007,7 +1048,6 @@ body[data-bg="sunset"] {
       rgba(255, 140, 120, 0.08)
     ),
     linear-gradient(180deg, #11121a 0%, #15142a 40%, #21173a 70%, #33193f 100%);
-  background-attachment: fixed;
 }
 .app {
   position: relative;

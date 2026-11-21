@@ -8,7 +8,7 @@ The only source of truth about the program. Each fact is short, atomic and verif
 - Markup is in `index.html`.
 - Styles are in `css/styles.css`.
 - Font faces are in `css/fonts.css`.
-- Scripts are classic scripts in `js/`, loaded in order: `settings.js`, `background.js`, `icons.js`, `sound.js`, `app.js`, `effects.js`.
+- Scripts are classic scripts in `js/`, loaded in order: `settings.js`, `background.js`, `icons.js`, `sound.js`, `app.js`, `data.js`, `effects.js`.
 - Font files are in `fonts/`.
 - Code is formatted with Prettier at print width 100.
 - The app has no build step.
@@ -18,10 +18,10 @@ The only source of truth about the program. Each fact is short, atomic and verif
 - The app installs from the website to a phone home screen.
 - The manifest display mode is `standalone`.
 - The service worker registers only over HTTPS.
-- The service worker is network-first.
-- The service worker falls back to cache when offline.
+- The service worker is stale-while-revalidate: it answers from the cache and refreshes in the background.
+- A new deploy shows on the launch after it is fetched.
 - The service worker caches Google Fonts responses.
-- The service worker cache name is `sq-v21`.
+- The service worker cache name is `sq-v26`.
 - The service worker precaches every app file.
 - `netlify.toml` publishes the folder with no build.
 - `sw.js` is served with `Cache-Control: no-cache`.
@@ -36,6 +36,17 @@ The only source of truth about the program. Each fact is short, atomic and verif
 - A quest's `log` keeps at most 500 entries.
 - The compact-mode preference is stored under `sidequests.compact`.
 - Settings are stored under `sidequests.settings`.
+- The app asks the browser for persistent storage on every load.
+- Settings can export a JSON backup of quests and settings.
+- Export uses the share sheet when it can share files, otherwise a download.
+- Backup files are named `side-quests-YYYY-MM-DD.json`.
+- Settings can import a backup, which replaces all quests.
+- An import can be undone for 9 seconds.
+- Imports reject files that aren't valid Side Quests backups.
+- Settings show when the last backup was made.
+- Unreadable saved data is kept under `sidequests.v1.unreadable` instead of being overwritten.
+- A failed save shows a message instead of failing silently.
+- Messages without an action hide the Undo button.
 
 ### Quests
 - A quest name is at most 40 characters.
@@ -65,8 +76,12 @@ The only source of truth about the program. Each fact is short, atomic and verif
 - A quest done today shows a mint "Done" pill.
 - The pill shows "×N" when done more than once today.
 - A quest done today has a mint ring around its icon.
+- A quest not done today has a barely visible ring (white at 7% opacity) around its icon.
 - Under each quest icon is how many completions remain to the next level.
 - The progress bar is 6px tall.
+- The progress bar has one rounded segment per completion needed for the next level, 3px apart.
+- A newly lit segment fills left to right.
+- Above 30 completions needed, the progress bar is smooth instead of segmented.
 - The phone header shows no clock.
 - Settings open from the sidebar on desktop and a gear in the top bar on phones.
 - Compact mode shows each quest as one row.
@@ -74,7 +89,8 @@ The only source of truth about the program. Each fact is short, atomic and verif
 - Layout switches to phone mode at 820px wide or less.
 
 ### Feedback
-- Completing a quest needs a 450ms hold.
+- Completing a quest needs an 800ms hold.
+- Releasing after the full hold time completes, even if the last animation frame hasn't run.
 - While holding, a pink ring closes around the check; it is the button's only animation.
 - In compact view, Complete is a round white glyph whose grey ring fills white, as in `hold-button-reference.png`.
 - Releasing early cancels and shows "Hold it".
@@ -103,6 +119,7 @@ The only source of truth about the program. Each fact is short, atomic and verif
 - Map markers are 6px rounded squares in `#ddbabb`, `#9099d7` or `#9dcfa3`, outlined in `#3f394a`.
 - Map markers sit only on city blocks.
 - The map canvas is shown at 70% opacity.
+- The Sunset background is painted on a fixed layer, not with `background-attachment: fixed`.
 - The Sunset background is pure CSS: five soft radial colour pools and a faint conic sweep over a dusk linear gradient.
 - Quest cards are translucent with a 14px backdrop blur.
 - The points counter digits are nudged up 0.08em to centre Pricedown optically.
@@ -251,9 +268,41 @@ The whole map canvas is shown at 70% opacity so it pulls less attention. Individ
 ### 2026-11-20 — New app icon
 The home-screen icon now shows the real logo text (SIDE QUESTS in Pricedown, white with the dark outline) over the same layered gradient as the Sunset background. The text is sized to survive Android's round crop.
 
+### 2026-11-20 — Protect against data loss
+Deleting the home-screen app on iPhone, or clearing site data, wipes local storage. Added:
+- persistent-storage request;
+- Export backup / Import backup in Settings (share sheet "Save to Files" on phones, download elsewhere);
+- "Last backup" note in Settings, kept quiet per the no-pulling-focus rule (no nag);
+- import validation and undo;
+- unreadable data is parked, never overwritten;
+- failed saves are reported.
+
+### 2026-11-21 — Meaningful icon ring, segmented progress
+- The pink ring around every icon was decoration. Now the icon has no ring until the quest is done today, then a mint ring. That's also the done signal in compact view, where the pill is hidden.
+- The progress bar is split into one segment per completion needed, so a quick quest shows a few chunky steps and a long-haul quest many small ones. Segments went on the bar, not the ring: at 20–25 segments a 40px ring turns into a blur. Above 30 it falls back to a smooth bar.
+- Storage format unchanged: no migration, nobody loses progress.
+Cache bumped to `sq-v23`.
+
+### 2026-11-21 — Rounded segments, reliable hold
+- Segments are now separate rounded pieces instead of a masked bar, which had cut them square.
+- Hold time is 800ms (changed in the code; fact updated to match).
+- Letting go after the full hold time now always completes. Slow phones can drop the last animation frame, which made a full hold count as an early release.
+Cache bumped to `sq-v24`.
+
+### 2026-11-21 — Faint ring back, segment fill animation
+The icon ring is back as a barely visible outline (white at 7%), still turning mint when done today. Each segment now fills left to right as it lights up, keeping the bar's old motion.
+Cache bumped to `sq-v25`.
+
+### 2026-11-21 — Performance
+Measured with 4× CPU slowdown on a phone-size screen: the map draws in about 20ms and scrolling holds 60fps, so the app itself is light. Fixed the real-world costs:
+- the service worker now answers from the cache instantly and refreshes in the background, instead of waiting on the network every launch;
+- the Sunset gradient sits on a fixed layer, so phones no longer repaint it on every scroll frame;
+- the browser connects to the icon-font server early.
+Trade-off: a new deploy appears on the second launch after it goes live.
+Cache bumped to `sq-v26`.
+
 ### Open
 **Accepted, to build**
-- Export/import JSON backup and `navigator.storage.persist()`. This is the biggest data-loss risk.
 - "Pick one for me" random quest button.
 - Reorder and pin quests; time-of-day groups.
 - Desktop sidebar as a narrow icon column for categories or time-of-day groups (waits on groups existing).

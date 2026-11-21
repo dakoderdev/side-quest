@@ -8,10 +8,11 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Side Quests" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
       crossorigin="anonymous"
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..24,400,1,-25..0&icon_names=add,alarm,apparel,auto_awesome,bathtub,bed,bedtime,cake,call,celebration,chair,chat,check,checkroom,child_care,clean_hands,cleaning_services,coffee,cooking,delete,dentistry,directions_bike,directions_run,directions_walk,draw,edit,edit_note,egg,favorite,fitness_center,groups,headphones,hiking,home,iron,kitchen,laptop,local_florist,local_grocery_store,local_laundry_service,mail,medication,menu_book,monitor_heart,music_note,palette,pets,photo_camera,piano,pill,pool,potted_plant,receipt_long,recycling,remove,restaurant,rocket_launch,savings,schedule,school,self_improvement,settings,shower,smartphone,sports_esports,sports_gymnastics,star,steps,sunny,vaccines,view_agenda,water_drop,work,yard&display=block"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..24,400,1,-25..0&icon_names=add,alarm,apparel,auto_awesome,bathtub,bed,bedtime,cake,call,celebration,chair,chat,check,checkroom,child_care,clean_hands,cleaning_services,coffee,cooking,delete,dentistry,directions_bike,directions_run,directions_walk,download,draw,edit,edit_note,egg,favorite,fitness_center,groups,headphones,hiking,home,iron,kitchen,laptop,local_florist,local_grocery_store,local_laundry_service,mail,medication,menu_book,monitor_heart,music_note,palette,pets,photo_camera,piano,pill,pool,potted_plant,receipt_long,recycling,remove,restaurant,rocket_launch,savings,schedule,school,self_improvement,settings,shower,smartphone,sports_esports,sports_gymnastics,star,steps,sunny,upload,vaccines,view_agenda,water_drop,work,yard&display=block"
     />
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="apple-touch-icon" href="icon-192.png" />
@@ -187,6 +188,19 @@
           </button>
           <button type="button" class="toggle" data-s="bg"><span>Background</span><i></i></button>
         </div>
+        <div class="field">
+          <span class="lbl">Your data</span>
+          <div class="databtns">
+            <button type="button" class="btn quiet" id="dExport">
+              <span class="ms" aria-hidden="true">download</span>Export backup
+            </button>
+            <button type="button" class="btn quiet" id="dImport">
+              <span class="ms" aria-hidden="true">upload</span>Import backup
+            </button>
+          </div>
+          <p class="hint" id="dataNote"></p>
+          <input type="file" id="dFile" accept="application/json,.json" hidden />
+        </div>
         <div class="row"><button type="button" class="btn" id="setDone">Done</button></div>
       </div>
     </div>
@@ -208,6 +222,7 @@
     <script src="js/icons.js"></script>
     <script src="js/sound.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/data.js"></script>
     <script src="js/effects.js"></script>
   </body>
 </html>

@@ -1,15 +1,28 @@
 const KEY = "sidequests.v1";
 let tasks = [];
 try {
-  tasks = JSON.parse(localStorage.getItem(KEY)) || [];
-} catch (e) {}
+  const raw = localStorage.getItem(KEY);
+  if (raw) {
+    tasks = JSON.parse(raw);
+    if (!Array.isArray(tasks)) throw new Error("not a list");
+  }
+} catch (e) {
+  // Never overwrite data we can't read: park it under another key before starting fresh.
+  try {
+    localStorage.setItem(KEY + ".unreadable", localStorage.getItem(KEY));
+  } catch (_) {}
+  tasks = [];
+}
 tasks.forEach((t) => {
   if (!ICONS[t.icon]) t.icon = EMOJI[t.icon] || "star";
 });
 const save = () => {
   try {
     localStorage.setItem(KEY, JSON.stringify(tasks));
-  } catch (e) {}
+  } catch (e) {
+    // Storage full or blocked: say so instead of losing progress silently.
+    snack("Couldn't save. Export a backup from Settings.", null);
+  }
 };
 const $ = (id) => document.getElementById(id);
 const today = () => new Date().toDateString();
@@ -41,6 +54,14 @@ const doneHTML = (d) =>
   d
     ? `<span class="done-pill" aria-label="Done ${times(d)} today">Done${d > 1 ? ` ×${d}` : ""}</span>`
     : "";
+// The bar is split into one segment per completion needed, so quick and long-haul quests
+// look different. Past SEG_MAX segments it stays a smooth bar so it never turns into noise.
+const SEG_MAX = 30;
+// Segmented: one rounded piece per completion, lit when done. Smooth: one fill.
+const trackHTML = (L) =>
+  L.need <= SEG_MAX
+    ? Array.from({ length: L.need }, (_, i) => `<i${i < L.into ? ' class="on"' : ""}></i>`).join("")
+    : `<i style="width:${(L.into / L.need) * 100}%"></i>`;
 // Waypoint-style line under the blip, like "0.72 mi" on the map.
 const toGo = (L) => `${L.need - L.into} to Lv ${L.lv + 1}`;
 
@@ -51,7 +72,7 @@ function cardHTML(t) {
     <div class="hd"><span class="blip"><span class="pin">${ic(t.icon)}</span><small class="num">${toGo(L)}</small></span>
       <div class="ttl"><h3 class="t-title">${esc(t.name)}</h3><p>${doneHTML(d)}</p></div>
       <div class="lv"><span>Level</span><b class="num">${L.lv}</b></div></div>
-    <div class="prog"><div class="track" role="progressbar" aria-label="${toGo(L)}" aria-valuemin="0" aria-valuemax="${L.need}" aria-valuenow="${L.into}"><i style="width:${(L.into / L.need) * 100}%"></i></div></div>
+    <div class="prog"><div class="track${L.need <= SEG_MAX ? " seg" : ""}" role="progressbar" aria-label="${toGo(L)}" aria-valuemin="0" aria-valuemax="${L.need}" aria-valuenow="${L.into}">${trackHTML(L)}</div></div>
     <div class="actions"><button class="btn" data-done aria-label="Hold to complete ${esc(t.name)}"><span class="ring">${gl(P_CHECK)}</span><span class="bt">Complete</span></button>
       <button class="iconbtn" data-edit aria-label="Edit ${esc(t.name)}">${gl(P_EDIT)}</button></div>
   </article>`;
@@ -286,6 +307,7 @@ let undoFn = null,
   snackT;
 function snack(text, fn) {
   undoFn = fn;
+  $("snackU").hidden = !fn;
   $("snackT").textContent = text;
   $("snack").classList.add("show");
   clearTimeout(snackT);
@@ -328,7 +350,7 @@ let hold = null;
 function holdStart(btn) {
   if (hold || btn.classList.contains("hit")) return;
   const t0 = performance.now();
-  hold = { btn, raf: 0 };
+  hold = { btn, raf: 0, t0 };
   btn.classList.add("holding");
   const step = (now) => {
     const p = Math.min(1, (now - t0) / HOLD_MS);
@@ -355,11 +377,22 @@ function holdEnd(early) {
     b.hintT = setTimeout(() => (l.textContent = "Complete"), 1200);
   }
 }
+// Letting go: if the full hold time has passed, it counts, even if the last animation frame
+// hasn't run yet (slow phones drop frames). Otherwise it's an early release.
+function holdRelease() {
+  if (!hold) return;
+  if (performance.now() - hold.t0 >= HOLD_MS) {
+    const b = hold.btn;
+    holdEnd(false);
+    complete(b);
+  } else holdEnd(true);
+}
 $("grid").addEventListener("pointerdown", (e) => {
   const b = e.target.closest("[data-done]");
   if (b && e.button === 0) holdStart(b);
 });
-["pointerup", "pointercancel"].forEach((ev) => addEventListener(ev, () => holdEnd(true)));
+addEventListener("pointerup", holdRelease);
+addEventListener("pointercancel", () => holdEnd(true));
 $("grid").addEventListener("pointerout", (e) => {
   if (hold && e.target.closest("[data-done]") === hold.btn && !hold.btn.contains(e.relatedTarget))
     holdEnd(true);
@@ -375,7 +408,7 @@ $("grid").addEventListener("keydown", (e) => {
   }
 });
 $("grid").addEventListener("keyup", (e) => {
-  if (e.key === " " || e.key === "Enter") holdEnd(true);
+  if (e.key === " " || e.key === "Enter") holdRelease();
 });
 
 function complete(btn) {
@@ -392,9 +425,19 @@ function complete(btn) {
   card.classList.add("done");
   card.querySelector(".ttl p").innerHTML = doneHTML(doneToday(t));
   card.querySelector(".blip small").textContent = toGo(L);
-  card.querySelector(".track").setAttribute("aria-valuenow", L.into);
-  card.querySelector(".track").setAttribute("aria-label", toGo(L));
-  card.querySelector(".track i").style.width = (L.into / L.need) * 100 + "%";
+  const track = card.querySelector(".track");
+  track.setAttribute("aria-valuenow", L.into);
+  track.setAttribute("aria-valuemax", L.need);
+  track.setAttribute("aria-label", toGo(L));
+  const seg = L.need <= SEG_MAX;
+  if (seg && track.children.length === L.need) track.children[L.into - 1]?.classList.add("on");
+  else if (!seg && !track.classList.contains("seg"))
+    track.firstElementChild.style.width = (L.into / L.need) * 100 + "%";
+  else {
+    // Level-up: the next level needs a different number of segments.
+    track.classList.toggle("seg", seg);
+    track.innerHTML = trackHTML(L);
+  }
   btn.classList.add("hit");
   clearTimeout(btn.hintT);
   btn.querySelector(".bt").textContent = "Done";
@@ -443,6 +486,7 @@ function syncSettings() {
 function openSettings() {
   lastFocus = document.activeElement;
   syncSettings();
+  dataStatus();
   showSheet($("setO"));
   setTimeout(() => $("setT").focus(), 20);
 }

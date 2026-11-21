@@ -24,7 +24,9 @@ Side Quests is a Progressive Web App (PWA). You install it from the website and 
    - **Android (Chrome):** tap **⋮**, then **Install app** (or **Add to Home screen**).
 3. Open it from the home screen icon.
 
-Your quests are saved on your device (in `localStorage`). They don't sync between devices, and clearing the browser's site data deletes them.
+Your quests are saved on your device (in `localStorage`). They don't sync between devices.
+
+**Back up before reinstalling.** On iPhone, deleting the home-screen app deletes its data, and clearing site data does the same on any phone. Open Settings → **Export backup** to save a file, then **Import backup** after reinstalling.
 
 ## Project structure
 

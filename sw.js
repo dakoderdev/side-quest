@@ -1,5 +1,7 @@
-// Network-first for the page (always fresh when online), cache as offline fallback.
-const C = "sq-v21",
+// Stale-while-revalidate: answer instantly from the cache, refresh it in the background.
+// The app opens at once even on a weak connection; a new deploy shows on the next launch.
+// Bumping the cache name still installs a complete fresh copy.
+const C = "sq-v26",
   F = [
     "./",
     "index.html",
@@ -13,6 +15,7 @@ const C = "sq-v21",
     "js/icons.js",
     "js/sound.js",
     "js/app.js",
+    "js/data.js",
     "js/effects.js",
     "fonts/pricedown.otf",
     "fonts/barlow-400.woff2",
@@ -31,21 +34,26 @@ self.addEventListener("activate", (e) =>
       .then(() => self.clients.claim()),
   ),
 );
+const ours = (u) =>
+  u.origin === location.origin || /^fonts\.(googleapis|gstatic)\.com$/.test(u.hostname);
 self.addEventListener("fetch", (e) => {
-  if (e.request.method !== "GET") return;
+  if (e.request.method !== "GET" || !ours(new URL(e.request.url))) return;
   e.respondWith(
-    fetch(e.request, { cache: "no-store" })
-      .then((res) => {
-        const u = new URL(e.request.url);
-        if (
-          res.ok &&
-          (u.origin === location.origin || /fonts.(googleapis|gstatic).com$/.test(u.hostname))
-        ) {
-          const cp = res.clone();
-          caches.open(C).then((c) => c.put(e.request, cp));
-        }
-        return res;
-      })
-      .catch(() => caches.match(e.request).then((r) => r || caches.match("index.html"))),
+    caches.open(C).then(async (c) => {
+      const hit = await c.match(e.request);
+      const fresh = fetch(e.request, { cache: "no-cache" })
+        .then((res) => {
+          if (res.ok) c.put(e.request, res.clone());
+          return res;
+        })
+        .catch(() => null);
+      if (hit) {
+        e.waitUntil(fresh);
+        return hit;
+      }
+      const res = await fresh;
+      if (res) return res;
+      return e.request.mode === "navigate" ? c.match("index.html") : Response.error();
+    }),
   );
 });

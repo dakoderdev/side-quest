@@ -13,7 +13,7 @@
 
 ## Project notes
 - No build step. Edit the files directly: `index.html` (markup), `css/styles.css`, `js/*.js`.
-- Scripts share globals and load in order (`settings.js`, `icons.js`, `sound.js`, `app.js`, `effects.js`). Keep that order in mind when adding top-level code.
+- Scripts share globals and load in order (`settings.js`, `background.js`, `icons.js`, `sound.js`, `app.js`, `data.js`, `effects.js`). Keep that order in mind when adding top-level code.
 - Format with `npx prettier --write --print-width 100 index.html css js sw.js`.
 - New files must be added to the precache list in `sw.js`.
 - When you change any cached file, bump the cache name in `sw.js`, and update the fact that records it.
