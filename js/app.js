@@ -382,39 +382,10 @@ const taskOf = (el) => tasks.find((x) => x.id === +el.closest(".card").dataset.i
 $("grid").onclick = (e) => {
   const card = e.target.closest(".card");
   if (!card) return;
-  if (e.target.closest("[data-edit]")) openForm(taskOf(card));
+  // Compact: tap a row anywhere but Complete to edit it.
+  if (e.target.closest("[data-edit]") || (compact && !e.target.closest("[data-done]")))
+    openForm(taskOf(card));
 };
-
-/* Compact: press and hold a row (anywhere but Complete) to edit it.
-   Moving the finger, e.g. to scroll, cancels the press. */
-const EDIT_HOLD_MS = 500;
-let press = null;
-const pressEnd = () => {
-  if (!press) return;
-  clearTimeout(press.t);
-  press.card.classList.remove("pressing");
-  press = null;
-};
-$("grid").addEventListener("pointerdown", (e) => {
-  const card = e.target.closest(".card");
-  if (!compact || !card || e.button !== 0 || e.target.closest("[data-done],[data-edit]")) return;
-  card.classList.add("pressing");
-  press = {
-    card,
-    x: e.clientX,
-    y: e.clientY,
-    t: setTimeout(() => {
-      pressEnd();
-      buzz(10);
-      openForm(taskOf(card));
-    }, EDIT_HOLD_MS),
-  };
-});
-$("grid").addEventListener("pointermove", (e) => {
-  if (press && Math.hypot(e.clientX - press.x, e.clientY - press.y) > 10) pressEnd();
-});
-addEventListener("pointerup", pressEnd);
-addEventListener("pointercancel", pressEnd);
 
 /* Hold to complete: a ring fills around the check, like a game's hold prompt.
    Letting go early cancels. The button is locked while it shows "Done",
@@ -472,7 +443,7 @@ $("grid").addEventListener("pointerout", (e) => {
     holdEnd(true);
 });
 $("grid").addEventListener("contextmenu", (e) => {
-  if (e.target.closest("[data-done]") || (compact && e.target.closest(".card"))) e.preventDefault();
+  if (e.target.closest("[data-done]")) e.preventDefault();
 });
 $("grid").addEventListener("keydown", (e) => {
   const b = e.target.closest("[data-done]");

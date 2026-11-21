@@ -1011,21 +1011,11 @@ button.key:hover {
 .compact .ttl {
   grid-column: 2;
 }
-/* Rows are pressed and held to edit: no text selection or iOS callout, and the row
-   lightens while held so the press reads as intentional. */
-.compact .card {
-  user-select: none;
-  -webkit-user-select: none;
-  -webkit-touch-callout: none;
-  transition: background-color 0.5s linear;
-}
+/* Rows are tapped to edit. */
 @media (hover: hover) {
   .compact .card {
     cursor: pointer;
   }
-}
-.compact .card.pressing {
-  background-color: var(--sunken-hi);
 }
 /* The edit button stays reachable by keyboard and screen readers, but isn't drawn
    until it has focus. */

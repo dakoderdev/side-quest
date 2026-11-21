@@ -21,7 +21,7 @@ The only source of truth about the program. Each fact is short, atomic and verif
 - The service worker is stale-while-revalidate: it answers from the cache and refreshes in the background.
 - A new deploy shows on the launch after it is fetched.
 - The service worker caches Google Fonts responses.
-- The service worker cache name is `sq-v32`.
+- The service worker cache name is `sq-v33`.
 - The service worker precaches every app file.
 - `netlify.toml` publishes the folder with no build.
 - `sw.js` is served with `Cache-Control: no-cache`.
@@ -100,9 +100,7 @@ The only source of truth about the program. Each fact is short, atomic and verif
 - The phone header shows no clock.
 - Settings open from the sidebar on desktop and a gear in the top bar on phones.
 - Compact mode shows each quest as one row.
-- In compact mode, holding a row for 500ms opens its edit screen.
-- Moving more than 10px cancels the hold-to-edit press.
-- A held compact row lightens while the press runs.
+- In compact mode, tapping a row anywhere but Complete opens its edit screen.
 - On desktop, compact rows show a pointer cursor.
 - In compact mode, the edit button is hidden until it has keyboard focus.
 - Layout switches to phone mode at 820px wide or less.
@@ -341,6 +339,10 @@ Cache bumped to `sq-v31`.
 ### 2026-11-21 — Counter badges
 Like the money counters in `ui-reference.png`, each counter line ends in a glyph in a small circle, a dark shade of the glyph colour: a pink star for all-time completions, a mint check (the done colour) for today. Each circle has a lighter inset ring. The today label lost its dark box on phones and gets the total's outlined text instead.
 Cache bumped to `sq-v32`.
+
+### 2026-11-21 — Tap to edit in compact
+Holding a row to edit felt slow. A plain tap anywhere on the row (except Complete) now opens edit.
+Cache bumped to `sq-v33`.
 
 ### Open
 **Accepted, to build**

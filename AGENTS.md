@@ -19,6 +19,12 @@
 - When you change any cached file, bump the cache name in `sw.js`, and update the fact that records it.
 - Adding an icon means adding its name to the Google Fonts `icon_names` list (kept in alphabetical order).
 
+## Commit names
+- The user makes the commits. Don't commit or push unless the user explicitly says to; when asked for a commit name, just suggest one.
+- Lowercase, short, no trailing period, no prefix like `feat:`.
+- Start with a verb or name the feature; join several changes with commas or "and".
+- Examples: `add one-off quests and hold to edit in compact`, `counter icons, bigger compact hold ring on phones`.
+
 ## Design rules
 - The app is an extension of the user's life. It adds some dopamine but never pulls focus away from doing things. Celebrations stay short and never block the screen.
 - The loud Complete button is intentional.
