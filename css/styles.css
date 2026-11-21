@@ -19,6 +19,20 @@
   --border: #5d5e74;
   /* Sunset band behind the logo (GTA VI key-art dusk). */
   --sunset: linear-gradient(180deg, #2a1838 0%, #5b2346 58%, #a8434b 100%);
+  /* The Sunset background scene, also behind the intro's welcome screen. */
+  --sunset-scene:
+    radial-gradient(60% 45% at 78% 100%, rgba(255, 168, 118, 0.42) 0%, rgba(255, 168, 118, 0) 70%),
+    radial-gradient(70% 55% at 55% 105%, rgba(235, 102, 162, 0.38) 0%, rgba(235, 102, 162, 0) 72%),
+    radial-gradient(45% 40% at 18% 92%, rgba(170, 70, 160, 0.3) 0%, rgba(170, 70, 160, 0) 70%),
+    radial-gradient(55% 45% at 92% 38%, rgba(120, 60, 150, 0.22) 0%, rgba(120, 60, 150, 0) 70%),
+    radial-gradient(60% 50% at 8% 8%, rgba(70, 50, 140, 0.28) 0%, rgba(70, 50, 140, 0) 70%),
+    conic-gradient(
+      from 200deg at 70% 110%,
+      rgba(255, 140, 120, 0.08),
+      rgba(120, 60, 150, 0.05),
+      rgba(255, 140, 120, 0.08)
+    ),
+    linear-gradient(180deg, #11121a 0%, #15142a 40%, #21173a 70%, #33193f 100%);
   --face: linear-gradient(160deg, #ffffff 0%, #ececef 55%, #d6d6db 100%);
   --face-ring:
     inset 0 0 0 1.5px rgba(126, 126, 138, 0.55), inset 0 1px 0 1.5px rgba(255, 255, 255, 0.5);
@@ -718,21 +732,39 @@ button.key:hover {
 .toggle:hover {
   background: var(--sunken-hi);
 }
+/* Pill switch, as in the reference: a lavender track with a white knob when off,
+   a pink track with the knob on the right when on. Both outlined in the logo's dark purple.
+   Every size is a whole pixel and the outlines are real borders inside each box, so the
+   gap around the knob is the same on all sides at any screen density.
+   Track 48×28: 2px border + 2px padding leaves a 20px knob and 20px of travel. */
 .toggle i {
-  font: 700 17px/1 var(--cond);
-  font-style: normal;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--text-3);
+  flex: none;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  width: 48px;
+  height: 28px;
+  padding: 2px;
+  border: 2px solid #1d0030;
+  border-radius: 14px;
+  background: rgba(214, 196, 240, 0.28);
+  transition: background-color 0.2s var(--ease);
 }
 .toggle i::after {
-  content: "‹ Off ›";
+  content: "";
+  box-sizing: border-box;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #1d0030;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s var(--ease);
 }
 .toggle[aria-checked="true"] i {
-  color: var(--mint);
+  background: var(--pink);
 }
 .toggle[aria-checked="true"] i::after {
-  content: "‹ On ›";
+  transform: translateX(20px);
 }
 .choices {
   display: grid;
@@ -827,22 +859,54 @@ button.key:hover {
   margin-top: var(--s6);
 }
 
+/* Times completed: label and stepper share one line, the hint sits under them. */
+#countF {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  column-gap: var(--s3);
+}
+#countF[hidden] {
+  display: none;
+}
+#countF > .lbl {
+  margin: 0;
+}
+#countF .hint {
+  grid-column: 1 / -1;
+}
 .stepper {
   display: flex;
   align-items: center;
-  gap: var(--s3);
+  gap: var(--s1);
 }
+/* Small 32px squares; an invisible 6px margin around each keeps the tap target at 44px. */
 .stepper .iconbtn {
+  position: relative;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0;
   background: var(--sunken);
   color: var(--text);
+}
+.stepper .iconbtn::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+}
+.stepper .iconbtn .ms {
+  --ms: 18px;
+}
+.stepper {
+  gap: var(--s3);
 }
 .stepper .iconbtn:hover {
   background: var(--sunken-hi);
 }
 .stepper output {
-  min-width: 64px;
+  min-width: 48px;
   text-align: center;
-  font: 700 30px/1 var(--cond);
+  font: 700 24px/1 var(--cond);
 }
 .hint {
   margin-top: var(--s2);
@@ -1150,19 +1214,7 @@ body[data-bg="sunset"]::after {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background:
-    radial-gradient(60% 45% at 78% 100%, rgba(255, 168, 118, 0.42) 0%, rgba(255, 168, 118, 0) 70%),
-    radial-gradient(70% 55% at 55% 105%, rgba(235, 102, 162, 0.38) 0%, rgba(235, 102, 162, 0) 72%),
-    radial-gradient(45% 40% at 18% 92%, rgba(170, 70, 160, 0.3) 0%, rgba(170, 70, 160, 0) 70%),
-    radial-gradient(55% 45% at 92% 38%, rgba(120, 60, 150, 0.22) 0%, rgba(120, 60, 150, 0) 70%),
-    radial-gradient(60% 50% at 8% 8%, rgba(70, 50, 140, 0.28) 0%, rgba(70, 50, 140, 0) 70%),
-    conic-gradient(
-      from 200deg at 70% 110%,
-      rgba(255, 140, 120, 0.08),
-      rgba(120, 60, 150, 0.05),
-      rgba(255, 140, 120, 0.08)
-    ),
-    linear-gradient(180deg, #11121a 0%, #15142a 40%, #21173a 70%, #33193f 100%);
+  background: var(--sunset-scene);
 }
 .app {
   position: relative;
@@ -1173,12 +1225,6 @@ body[data-bg="sunset"]::after {
   background: rgba(28, 28, 39, 0.78);
   -webkit-backdrop-filter: blur(8px) saturate(1.2);
   backdrop-filter: blur(8px) saturate(1.2);
-}
-.toggle[data-s="bg"] i {
-  color: var(--text);
-}
-.toggle[data-s="bg"] i::after {
-  content: none;
 }
 canvas#fx {
   position: fixed;
@@ -1372,5 +1418,177 @@ canvas#fx {
   *::before {
     transition: none !important;
     animation-duration: 0.01s !important;
+  }
+}
+
+/* ---------- first-run intro ---------- */
+/* Full screen and opaque, so nothing behind it competes with the intro. */
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  padding: calc(var(--s4) + env(safe-area-inset-top)) var(--s5)
+    calc(var(--s5) + env(safe-area-inset-bottom));
+  background: var(--bg);
+  isolation: isolate;
+}
+/* The welcome screen sits in the Sunset scene, full bleed; it fades out as you move on. */
+.intro::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--sunset-scene);
+  opacity: 0;
+  transition: opacity 0.6s var(--ease);
+}
+.intro.welcome::before {
+  opacity: 1;
+}
+.intro[hidden] {
+  display: none;
+}
+.intro-skip {
+  justify-self: end;
+  min-height: 44px;
+  padding: 0 var(--s2);
+  font: 700 15px/1 var(--cond);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+.intro-skip:hover {
+  color: var(--text);
+}
+.intro-track {
+  display: grid;
+  align-items: center;
+  width: min(440px, 100%);
+  justify-self: center;
+  overflow: hidden;
+}
+/* All steps share one cell; only the current one shows, sliding in from the side it comes from. */
+.intro-step {
+  grid-area: 1 / 1;
+  display: grid;
+  gap: var(--s3);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(var(--from, 24px));
+  transition:
+    opacity 0.35s var(--ease),
+    transform 0.45s var(--ease),
+    visibility 0s 0.35s;
+}
+.intro-step.on {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition:
+    opacity 0.35s var(--ease),
+    transform 0.45s var(--ease);
+}
+.intro-art {
+  display: grid;
+  place-items: center;
+  min-height: 210px;
+  margin-bottom: var(--s4);
+}
+.intro-step h2 {
+  font: 700 40px/0.95 var(--cond);
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  text-wrap: balance;
+}
+.intro-step h2:focus {
+  outline: none;
+}
+.intro-step p {
+  font-size: 18px;
+  color: var(--text-2);
+  text-wrap: pretty;
+}
+.intro-step .intro-aside {
+  font-size: 15px;
+  color: var(--text-3);
+}
+.intro-logo {
+  font:
+    400 96px/0.78 "Pricedown",
+    var(--cond);
+  letter-spacing: 0.02em;
+  color: #fff;
+  -webkit-text-stroke: 8px #1d0030;
+  paint-order: stroke fill;
+  text-shadow:
+    0 5px 0 #1d0030,
+    0 10px 28px rgba(29, 0, 48, 0.55);
+}
+/* Example cards are real card markup, made inert. */
+.intro-demo {
+  width: 100%;
+}
+.intro-demo .card {
+  pointer-events: none;
+}
+.intro-prefs {
+  place-items: stretch;
+  align-content: center;
+  gap: var(--s3);
+}
+.intro-prefs .lbl {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-2);
+}
+.intro-prefs .toggles {
+  margin-top: var(--s3);
+}
+.intro-nav {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: var(--s4);
+  width: min(440px, 100%);
+  justify-self: center;
+}
+.intro-nav .btn[hidden] {
+  display: none;
+}
+/* Step pips use the progress bar's segment language. */
+.intro-pips {
+  display: flex;
+  gap: 3px;
+  max-width: 96px;
+}
+.intro-pips i {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background:
+    linear-gradient(var(--cyan), var(--cyan)) left / 0% 100% no-repeat,
+    var(--sunken);
+  transition: background-size 0.45s var(--ease);
+}
+.intro-pips i.on {
+  background-size:
+    100% 100%,
+    auto;
+}
+@media (max-width: 820px) {
+  .intro-art {
+    min-height: 170px;
+  }
+  .intro-step h2 {
+    font-size: 34px;
+  }
+  .intro-step p {
+    font-size: 17px;
+  }
+  .intro-logo {
+    font-size: 76px;
+    -webkit-text-stroke-width: 7px;
   }
 }

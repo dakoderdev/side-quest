@@ -1,7 +1,7 @@
 // Stale-while-revalidate: answer instantly from the cache, refresh it in the background.
 // The app opens at once even on a weak connection; a new deploy shows on the next launch.
 // Bumping the cache name still installs a complete fresh copy.
-const C = "sq-v33",
+const C = "sq-v35",
   F = [
     "./",
     "index.html",
@@ -17,6 +17,7 @@ const C = "sq-v33",
     "js/app.js",
     "js/data.js",
     "js/effects.js",
+    "js/intro.js",
     "fonts/pricedown.otf",
     "fonts/barlow-400.woff2",
     "fonts/barlow-500.woff2",

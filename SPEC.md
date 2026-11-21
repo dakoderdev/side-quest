@@ -8,7 +8,7 @@ The only source of truth about the program. Each fact is short, atomic and verif
 - Markup is in `index.html`.
 - Styles are in `css/styles.css`.
 - Font faces are in `css/fonts.css`.
-- Scripts are classic scripts in `js/`, loaded in order: `settings.js`, `background.js`, `icons.js`, `sound.js`, `app.js`, `data.js`, `effects.js`.
+- Scripts are classic scripts in `js/`, loaded in order: `settings.js`, `background.js`, `icons.js`, `sound.js`, `app.js`, `data.js`, `effects.js`, `intro.js`.
 - Font files are in `fonts/`.
 - Code is formatted with Prettier at print width 100.
 - The app has no build step.
@@ -21,7 +21,7 @@ The only source of truth about the program. Each fact is short, atomic and verif
 - The service worker is stale-while-revalidate: it answers from the cache and refreshes in the background.
 - A new deploy shows on the launch after it is fetched.
 - The service worker caches Google Fonts responses.
-- The service worker cache name is `sq-v33`.
+- The service worker cache name is `sq-v35`.
 - The service worker precaches every app file.
 - `netlify.toml` publishes the folder with no build.
 - `sw.js` is served with `Cache-Control: no-cache`.
@@ -39,6 +39,7 @@ The only source of truth about the program. Each fact is short, atomic and verif
 - A quest's `log` keeps at most 500 entries.
 - The compact-mode preference is stored under `sidequests.compact`.
 - Settings are stored under `sidequests.settings`.
+- Whether the intro was seen is stored under `sidequests.intro`.
 - The app asks the browser for persistent storage on every load.
 - Settings can export a JSON backup of quests and settings.
 - Export uses the share sheet when it can share files, otherwise a download.
@@ -67,6 +68,8 @@ The only source of truth about the program. Each fact is short, atomic and verif
 - A finished one-off stays stored, so its completion still counts as a point.
 - Edit can switch a quest between one-off and repeating.
 - The edit screen can change a quest's completion count.
+- The completion count's label and stepper share one line.
+- Stepper buttons are 32px with a 44px tap target.
 - There are 68 quest icons.
 - The icon picker has 8px row gaps and 10px column gaps.
 - The icon picker shows 4.5 rows and scrolls.
@@ -104,6 +107,20 @@ The only source of truth about the program. Each fact is short, atomic and verif
 - On desktop, compact rows show a pointer cursor.
 - In compact mode, the edit button is hidden until it has keyboard focus.
 - Layout switches to phone mode at 820px wide or less.
+
+### Intro
+- A four-screen intro shows on launch when there are no quests and it hasn't been seen.
+- The intro screens are: welcome, keep it tiny, level it up, make it yours.
+- The intro covers the screen with an opaque page-colour background.
+- The intro's welcome screen shows the Sunset scene full bleed behind a large outlined logo.
+- The intro's example cards are real card markup made inert.
+- The level-up screen fills the last segment, then shows Level 2.
+- The last intro screen sets background, compact list and sound effects live.
+- Finishing the intro opens the New quest sheet.
+- Skip and Escape close the intro and mark it seen.
+- Arrow keys move between intro screens.
+- Intro step pips look like progress bar segments.
+- Settings → How it works shows the intro again.
 
 ### Feedback
 - Completing a quest needs an 800ms hold.
@@ -146,7 +163,10 @@ The only source of truth about the program. Each fact is short, atomic and verif
 - On desktop, Settings and the compact toggle sit together at the bottom of the sidebar.
 - On desktop, the top right shows only the points counter.
 - On phones, the compact toggle is in the top bar.
-- Settings show values as "‹ On ›" and "‹ Off ›".
+- Switches are pills: a lavender track when off, a pink track when on, with a white knob, outlined in `#1d0030`.
+- The compact Complete disc is pinned 6px inside its 40px ring, which is 4px thick.
+- Switches use whole-pixel sizes: a 48×28 track with 2px border and padding, and a 20px knob with a 2px border.
+- Settings pick the background from three tiles: Map, Sunset and Plain.
 - Closing the new-quest sheet without saving keeps the typed name for next time.
 - Cancel clears the new-quest draft.
 - On touch screens, Enter in the name field closes the keyboard instead of submitting.
@@ -343,6 +363,14 @@ Cache bumped to `sq-v32`.
 ### 2026-11-21 — Tap to edit in compact
 Holding a row to edit felt slow. A plain tap anywhere on the row (except Complete) now opens edit.
 Cache bumped to `sq-v33`.
+
+### 2026-11-21 — First-run intro
+A designated intro instead of scattered hints, kept to four screens (simple apps need about three to five). It teaches the three things that matter (keep quests tiny, repeat to level up, make it yours) and ends inside the real loop by opening the New quest sheet. Hold-to-complete is mentioned in passing, not taught. Examples use real card markup so they look exactly like the app. The customise screen changes the real settings. The intro is opaque, so the app behind it doesn't compete. Shown once to people with no quests; replayable from Settings.
+Cache bumped to `sq-v34`.
+
+### 2026-11-21 — Pill switches, background tiles
+"‹ Off ›" in dim grey read as disabled, and the arrows were too small to signal anything on a phone. Switches now use the reference's pill toggle (lavender off, pink on, white knob, dark outline). The background setting, which cycled on tap, is now three tiles like the pace picker and the intro, so every option is visible and one tap away.
+Cache bumped to `sq-v35`.
 
 ### Open
 **Accepted, to build**

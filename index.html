@@ -191,7 +191,20 @@
           <button type="button" class="toggle" role="switch" data-s="fx">
             <span>Confetti</span><i></i>
           </button>
-          <button type="button" class="toggle" data-s="bg"><span>Background</span><i></i></button>
+        </div>
+        <div class="field">
+          <span class="lbl" id="setBgL">Background</span>
+          <div class="choices pace" id="setBg" role="group" aria-labelledby="setBgL">
+            <button type="button" class="sel" data-bg="map" aria-pressed="false">
+              <b>Map</b><span>City at night</span>
+            </button>
+            <button type="button" class="sel" data-bg="sunset" aria-pressed="false">
+              <b>Sunset</b><span>Dusk glow</span>
+            </button>
+            <button type="button" class="sel" data-bg="plain" aria-pressed="false">
+              <b>Plain</b><span>Just dark</span>
+            </button>
+          </div>
         </div>
         <div class="field">
           <span class="lbl">Your data</span>
@@ -206,7 +219,76 @@
           <p class="hint" id="dataNote"></p>
           <input type="file" id="dFile" accept="application/json,.json" hidden />
         </div>
-        <div class="row"><button type="button" class="btn" id="setDone">Done</button></div>
+        <div class="row">
+          <button type="button" class="btn quiet" id="setIntro">How it works</button
+          ><button type="button" class="btn" id="setDone">Done</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- First-run intro: four short screens over the live background. -->
+    <div class="intro" id="intro" role="dialog" aria-modal="true" aria-labelledby="introH1" hidden>
+      <button type="button" class="intro-skip" id="introSkip">Skip</button>
+      <div class="intro-track" id="introTrack">
+        <section class="intro-step" data-step="0">
+          <div class="intro-art">
+            <div class="intro-logo" aria-hidden="true">SIDE<br />QUESTS</div>
+          </div>
+          <h2 id="introH1" tabindex="-1">Your day, as side quests</h2>
+          <p>
+            The little things you already mean to do. Do one, check it off, and watch it level up.
+          </p>
+        </section>
+        <section class="intro-step" data-step="1" aria-labelledby="introH2">
+          <div class="intro-art"><div class="intro-demo" id="introCard1" inert></div></div>
+          <h2 id="introH2" tabindex="-1">Keep it tiny</h2>
+          <p>
+            One step you can do in 1 to 8 minutes. Not “clean the kitchen”. “Put one dish away.”
+          </p>
+          <p class="intro-aside">Done it? Hold Complete for a second and it counts.</p>
+        </section>
+        <section class="intro-step" data-step="2" aria-labelledby="introH3">
+          <div class="intro-art"><div class="intro-demo" id="introCard2" inert></div></div>
+          <h2 id="introH3" tabindex="-1">Do it again, level it up</h2>
+          <p>
+            Each quest fills its bar as you repeat it, then levels up. Skip a day and nothing is
+            lost.
+          </p>
+        </section>
+        <section class="intro-step" data-step="3" aria-labelledby="introH4">
+          <div class="intro-art intro-prefs">
+            <span class="lbl" id="introBgL">Background</span>
+            <div class="choices pace" id="introBg" role="group" aria-labelledby="introBgL">
+              <button type="button" class="sel" data-bg="map" aria-pressed="false">
+                <b>Map</b><span>City at night</span>
+              </button>
+              <button type="button" class="sel" data-bg="sunset" aria-pressed="false">
+                <b>Sunset</b><span>Dusk glow</span>
+              </button>
+              <button type="button" class="sel" data-bg="plain" aria-pressed="false">
+                <b>Plain</b><span>Just dark</span>
+              </button>
+            </div>
+            <div class="toggles">
+              <button type="button" class="toggle" role="switch" id="introCompact">
+                <span>Compact list</span><i></i>
+              </button>
+              <button type="button" class="toggle" role="switch" id="introSound">
+                <span>Sound effects</span><i></i>
+              </button>
+            </div>
+          </div>
+          <h2 id="introH4" tabindex="-1">Make it yours</h2>
+          <p>
+            Pick a look. Background and sound live in Settings, and the list button next to it
+            switches compact any time.
+          </p>
+        </section>
+      </div>
+      <div class="intro-nav">
+        <div class="intro-pips" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <button type="button" class="btn quiet" id="introBack">Back</button>
+        <button type="button" class="btn" id="introNext">Next</button>
       </div>
     </div>
 
@@ -229,5 +311,6 @@
     <script src="js/app.js"></script>
     <script src="js/data.js"></script>
     <script src="js/effects.js"></script>
+    <script src="js/intro.js"></script>
   </body>
 </html>

@@ -257,6 +257,7 @@ const openSheet = () => document.querySelector(".overlay.show");
 const showSheet = (o) => o.classList.add("show");
 const hideSheet = (o) => o.classList.remove("show");
 addEventListener("keydown", (e) => {
+  if (!$("intro").hidden) return; // the intro handles its own keys
   const o = openSheet();
   if (o) {
     if (e.key === "Escape") o === $("overlay") ? closeForm() : closeSettings();
@@ -529,11 +530,11 @@ function syncSettings() {
     .querySelectorAll("[data-s]")
     .forEach((b) => {
       const k = b.dataset.s;
-      if (k === "bg") {
-        b.querySelector("i").textContent = `‹ ${BG_NAMES[SET.bg]} ›`;
-        b.setAttribute("aria-label", `Background: ${BG_NAMES[SET.bg]}. Change`);
-      } else b.setAttribute("aria-checked", k === "compact" ? compact : SET[k]);
+      b.setAttribute("aria-checked", k === "compact" ? compact : SET[k]);
     });
+  $("setBg")
+    .querySelectorAll("[data-bg]")
+    .forEach((b) => b.setAttribute("aria-pressed", b.dataset.bg === SET.bg));
 }
 function openSettings() {
   lastFocus = document.activeElement;
@@ -551,14 +552,18 @@ $("setList").onclick = (e) => {
   if (!b) return;
   const k = b.dataset.s;
   if (k === "compact") setDensity(!compact);
-  else if (k === "bg") {
-    SET.bg = BGS[(BGS.indexOf(SET.bg) + 1) % BGS.length];
-    saveSet();
-    applyBg();
-  } else {
+  else {
     SET[k] = !SET[k];
     saveSet();
   }
+  syncSettings();
+};
+$("setBg").onclick = (e) => {
+  const b = e.target.closest("[data-bg]");
+  if (!b) return;
+  SET.bg = b.dataset.bg;
+  saveSet();
+  applyBg();
   syncSettings();
 };
 $("setDone").onclick = closeSettings;
