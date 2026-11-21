@@ -21,7 +21,7 @@ The only source of truth about the program. Each fact is short, atomic and verif
 - The service worker is stale-while-revalidate: it answers from the cache and refreshes in the background.
 - A new deploy shows on the launch after it is fetched.
 - The service worker caches Google Fonts responses.
-- The service worker cache name is `sq-v26`.
+- The service worker cache name is `sq-v27`.
 - The service worker precaches every app file.
 - `netlify.toml` publishes the folder with no build.
 - `sw.js` is served with `Cache-Control: no-cache`.
@@ -131,6 +131,7 @@ The only source of truth about the program. Each fact is short, atomic and verif
 - Settings show values as "‹ On ›" and "‹ Off ›".
 - Closing the new-quest sheet without saving keeps the typed name for next time.
 - Cancel clears the new-quest draft.
+- On touch screens, Enter in the name field closes the keyboard instead of submitting.
 - Sheets trap keyboard focus.
 - Opening a sheet moves focus into it.
 - The quest list is not an ARIA live region.
@@ -300,6 +301,9 @@ Measured with 4× CPU slowdown on a phone-size screen: the map draws in about 20
 - the browser connects to the icon-font server early.
 Trade-off: a new deploy appears on the second launch after it goes live.
 Cache bumped to `sq-v26`.
+
+### 2026-11-21 — Enter doesn't submit on phones
+Pressing Done/Enter on the phone keyboard after typing a name created the quest and closed the sheet before you could pick an icon or pace. On touch screens it now just closes the keyboard. Desktop Enter still submits.
 
 ### Open
 **Accepted, to build**

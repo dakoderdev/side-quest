@@ -256,6 +256,14 @@ addEventListener("keydown", (e) => {
   } else if (k === "q") shiftTab(-1);
   else if (k === "e") shiftTab(1);
 });
+// On touch screens, Enter ("Done" on the keyboard) just closes the keyboard so you can still
+// pick an icon and pace. The quest is created only with the Start quest button.
+$("fName").addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !matchMedia("(hover: hover)").matches) {
+    e.preventDefault();
+    e.target.blur();
+  }
+});
 $("form").onsubmit = (e) => {
   e.preventDefault();
   const name = $("fName").value.trim();
