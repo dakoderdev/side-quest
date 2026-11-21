@@ -1,5 +1,5 @@
 // Network-first for the page (always fresh when online), cache as offline fallback.
-const C = "sq-v20",
+const C = "sq-v21",
   F = [
     "./",
     "index.html",

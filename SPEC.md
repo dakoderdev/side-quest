@@ -21,7 +21,7 @@ The only source of truth about the program. Each fact is short, atomic and verif
 - The service worker is network-first.
 - The service worker falls back to cache when offline.
 - The service worker caches Google Fonts responses.
-- The service worker cache name is `sq-v20`.
+- The service worker cache name is `sq-v21`.
 - The service worker precaches every app file.
 - `netlify.toml` publishes the folder with no build.
 - `sw.js` is served with `Cache-Control: no-cache`.
@@ -130,6 +130,8 @@ The only source of truth about the program. Each fact is short, atomic and verif
 - The theme is dark only.
 - Chrome colours are sampled from `ui-reference.png`: surface `#1c1c27`, page `#12131b`, pink `#eb66a2`.
 - The logo sits on a sunset gradient band.
+- The app icon is the SIDE QUESTS logo in Pricedown over the Sunset background gradient.
+- The icon's text stays inside the central 80% so maskable crops keep it.
 - The desktop sidebar is solid dark chrome with no diagonal seam.
 - The phone header is a flat sunset band with no slanted edge.
 - The display fonts are Pricedown, Barlow and Barlow Condensed.
@@ -245,6 +247,9 @@ The map uses exact colours sampled from the user's GTA VI map close-up. City blo
 
 ### 2026-11-20 — Dimmer map
 The whole map canvas is shown at 70% opacity so it pulls less attention. Individual colours are unchanged.
+
+### 2026-11-20 — New app icon
+The home-screen icon now shows the real logo text (SIDE QUESTS in Pricedown, white with the dark outline) over the same layered gradient as the Sunset background. The text is sized to survive Android's round crop.
 
 ### Open
 **Accepted, to build**
