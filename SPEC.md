@@ -21,7 +21,7 @@ The only source of truth about the program. Each fact is short, atomic and verif
 - The service worker is stale-while-revalidate: it answers from the cache and refreshes in the background.
 - A new deploy shows on the launch after it is fetched.
 - The service worker caches Google Fonts responses.
-- The service worker cache name is `sq-v35`.
+- The service worker cache name is `sq-v36`.
 - The service worker precaches every app file.
 - `netlify.toml` publishes the folder with no build.
 - `sw.js` is served with `Cache-Control: no-cache`.
@@ -101,7 +101,27 @@ The only source of truth about the program. Each fact is short, atomic and verif
 - A newly lit segment fills left to right.
 - Above 30 completions needed, the progress bar is smooth instead of segmented.
 - The phone header shows no clock.
-- Settings open from the sidebar on desktop and a gear in the top bar on phones.
+- Settings open from the sidebar on desktop and a gear in the sunset band on phones.
+- The phone sunset band is one line: logo, all-time total, settings gear.
+- On phones, today's count is a mint badge on the Done today tab, hidden at 0.
+- The today badge is a map-marker tag: mint, 2px `#1d0030` outline, 5px corners, pointer on its left toward the label.
+- The phone dock holds Quests, New quest and Cards; New quest is the wide middle button.
+- Cards open from the desktop sidebar menu and the phone dock.
+- The Cards sheet lists milestones at 10, 20, 50, 100, 200, 500 and 1000 all-time completions.
+- A milestone shows as earned once the all-time total reaches it.
+- The Cards sheet shows milestones in 3 columns.
+- In the Cards sheet only the card grid scrolls; the title and Done stay put.
+- A card is its milestone number in Pricedown on a background, with no illustration.
+- Card finish depends on the milestone: soft foil below 50, strong holo for 50 and 100, gold from 200.
+- Tapping an earned card opens it big in a viewer.
+- In the viewer the card tilts toward the pointer and its foil and glare follow it.
+- The viewer card arrives with one glare sweep.
+- Locked milestones show their number centred, with "N to go" at the bottom.
+- Crossing a milestone pops the new card up mid-screen with a glare sweep.
+- The milestone card lingers, then shrinks into the Cards button, 3.4 seconds in all.
+- The milestone card has no dim and nothing to dismiss; only the card itself takes taps.
+- Tapping the milestone card while it's up opens it in the viewer.
+- Reduced-motion users get no card tilt or card animations.
 - Compact mode shows each quest as one row.
 - In compact mode, tapping a row anywhere but Complete opens its edit screen.
 - On desktop, compact rows show a pointer cursor.
@@ -371,6 +391,16 @@ Cache bumped to `sq-v34`.
 ### 2026-11-21 — Pill switches, background tiles
 "‹ Off ›" in dim grey read as disabled, and the arrows were too small to signal anything on a phone. Switches now use the reference's pill toggle (lavender off, pink on, white knob, dark outline). The background setting, which cycled on tap, is now three tiles like the pace picker and the intro, so every option is visible and one tap away.
 Cache bumped to `sq-v35`.
+
+### 2026-11-21 — Slimmer phone header, dock nav, Cards placeholder
+The phone header took about 150px before the first quest. The sunset band is now one line (logo, total, gear), and today's count moved to a badge on the Done today tab. The dock became the phone nav, with Quests and Cards on either side of New quest, so the coming card collection has a home without crowding the top. Cards is a placeholder for now: a sheet of milestones, no card art yet.
+Cache bumped to `sq-v36`.
+
+### 2026-11-21 — Holo cards and milestone glint
+Nobody here illustrates, so a card is its milestone number on the sunset, and the shine is code: a rainbow foil and a glare that follow the pointer while the card tilts. Rarity is the finish (foil, holo, gold) so it costs no art. Reaching a milestone doesn't open the card over the screen, per the rewards-stay-in-the-background rule: a small card slides in with a glint and leaves on its own; tapping it opens the big view.
+
+### 2026-11-21 — Milestone card pops, then stashes
+The rule against blocking means no chains of screens or buttons to click through, not "keep it tiny". So the new card pops up mid-screen and glints, stays a moment, then flies into the Cards button. Nothing to dismiss, no dim. It replaces the corner toast. Locked milestone numbers are now centred and bigger.
 
 ### Open
 **Accepted, to build**

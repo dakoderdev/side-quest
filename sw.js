@@ -1,7 +1,7 @@
 // Stale-while-revalidate: answer instantly from the cache, refresh it in the background.
 // The app opens at once even on a weak connection; a new deploy shows on the next launch.
 // Bumping the cache name still installs a complete fresh copy.
-const C = "sq-v35",
+const C = "sq-v36",
   F = [
     "./",
     "index.html",

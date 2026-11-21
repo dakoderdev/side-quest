@@ -12,7 +12,7 @@
     <link
       rel="stylesheet"
       crossorigin="anonymous"
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..24,400,1,-25..0&icon_names=add,alarm,apparel,auto_awesome,bathtub,bed,bedtime,cake,call,celebration,chair,chat,check,checkroom,child_care,clean_hands,cleaning_services,coffee,cooking,delete,dentistry,directions_bike,directions_run,directions_walk,download,draw,edit,edit_note,egg,favorite,fitness_center,groups,headphones,hiking,home,iron,kitchen,laptop,local_florist,local_grocery_store,local_laundry_service,mail,medication,menu_book,monitor_heart,music_note,palette,pets,photo_camera,piano,pill,pool,potted_plant,receipt_long,recycling,remove,restaurant,rocket_launch,savings,schedule,school,self_improvement,settings,shower,smartphone,sports_esports,sports_gymnastics,star,steps,sunny,upload,vaccines,view_agenda,water_drop,work,yard&display=block"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..24,400,1,-25..0&icon_names=add,alarm,apparel,auto_awesome,bathtub,bed,bedtime,cake,call,celebration,chair,chat,check,checkroom,child_care,clean_hands,cleaning_services,coffee,cooking,delete,dentistry,directions_bike,directions_run,directions_walk,download,draw,edit,edit_note,egg,favorite,fitness_center,groups,headphones,hiking,home,iron,kitchen,laptop,local_florist,local_grocery_store,local_laundry_service,mail,medication,menu_book,monitor_heart,music_note,palette,pets,photo_camera,piano,pill,pool,potted_plant,receipt_long,recycling,remove,restaurant,rocket_launch,savings,schedule,school,self_improvement,settings,shower,smartphone,sports_esports,sports_gymnastics,star,steps,style,sunny,upload,vaccines,view_agenda,water_drop,work,yard&display=block"
     />
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="apple-touch-icon" href="icon-192.png" />
@@ -25,14 +25,20 @@
     <canvas id="fx" aria-hidden="true"></canvas>
     <div class="app">
       <aside class="side">
-        <div class="logo" aria-label="Side Quests">SIDE<br />QUESTS</div>
+        <div class="logo" aria-label="Side Quests">SIDE <br />QUESTS</div>
         <div class="points" data-points aria-hidden="true"></div>
+        <button class="iconbtn" id="tSet" aria-label="Settings">
+          <span class="ms" aria-hidden="true">settings</span>
+        </button>
         <nav class="menu" aria-label="Main">
           <button class="sel" aria-current="page" id="mQuests">
             <span class="ms" aria-hidden="true">menu_book</span>Quests
           </button>
           <button class="sel" id="mNew">
             <span class="ms" aria-hidden="true">add</span>New quest
+          </button>
+          <button class="sel" id="mCards">
+            <span class="ms" aria-hidden="true">style</span>Cards
           </button>
         </nav>
         <div class="side-foot">
@@ -80,15 +86,12 @@
                 tabindex="-1"
                 data-f="done"
               >
-                Done today
+                Done today<span class="tcount num" data-today></span>
               </button>
             </div>
             <button class="key" data-shift="1" tabindex="-1" aria-label="Next tab (E)">E</button>
           </div>
           <div class="points" data-points></div>
-          <button class="iconbtn" id="tSet" aria-label="Settings">
-            <span class="ms" aria-hidden="true">settings</span>
-          </button>
           <button
             class="iconbtn density"
             id="density"
@@ -111,9 +114,15 @@
       <span>Tabs <i class="key">Q</i><i class="key">E</i></span>
     </div>
 
-    <div class="dock">
+    <nav class="dock" aria-label="Main">
+      <button class="dnav" id="dQuests" aria-current="page">
+        <span class="ms" aria-hidden="true">menu_book</span>Quests
+      </button>
       <button class="btn" id="dNew"><span class="ms" aria-hidden="true">add</span>New quest</button>
-    </div>
+      <button class="dnav" id="dCards">
+        <span class="ms" aria-hidden="true">style</span>Cards
+      </button>
+    </nav>
 
     <div class="overlay" id="overlay">
       <form
@@ -224,6 +233,32 @@
           ><button type="button" class="btn" id="setDone">Done</button>
         </div>
       </div>
+    </div>
+
+    <!-- Card collection. Placeholder until the cards themselves are designed. -->
+    <div class="overlay" id="cardsO">
+      <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="cardsT">
+        <h2 id="cardsT" tabindex="-1">Cards</h2>
+        <p class="lede">Earn a card each time your all-time total hits a milestone.</p>
+        <ul class="milestones" id="cardsList"></ul>
+        <div class="row">
+          <button type="button" class="btn" id="cardsDone">Done</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- One card, big, tilting toward the pointer. -->
+    <div class="overlay cardview" id="cardV">
+      <div class="cv" role="dialog" aria-modal="true" aria-labelledby="cvT">
+        <h2 id="cvT" class="sr" tabindex="-1"></h2>
+        <div class="holo" id="holo"></div>
+        <button type="button" class="btn" id="cvDone">Done</button>
+      </div>
+    </div>
+
+    <!-- Milestone: the new card pops up, lingers, then stashes into Cards. -->
+    <div class="cardpop" id="cardPopBox" hidden>
+      <button type="button" id="cardPop"></button>
     </div>
 
     <!-- First-run intro: four short screens over the live background. -->

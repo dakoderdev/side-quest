@@ -120,6 +120,13 @@ function points() {
     n.title = `${all} completed all time, ${td} today`;
     if (lastAll !== null && all > lastAll) n.querySelector("b").classList.add("bump");
   });
+  // Crossing a milestone (not loading past one) earns its card.
+  if (lastAll !== null && all > lastAll) {
+    const m = MILESTONES.filter((x) => x > lastAll && x <= all).pop();
+    if (m) cardEarned(m);
+  }
+  // On phones today's count sits on the Done today tab instead of the header.
+  document.querySelectorAll("[data-today]").forEach((n) => (n.textContent = td || ""));
   lastAll = all;
 }
 
@@ -253,14 +260,22 @@ $("overlay").onclick = (e) => {
 };
 
 /* sheets: show/hide with a simple focus trap */
-const openSheet = () => document.querySelector(".overlay.show");
+// The topmost open sheet (the card viewer can sit over the Cards sheet).
+const openSheet = () => [...document.querySelectorAll(".overlay.show")].pop();
 const showSheet = (o) => o.classList.add("show");
 const hideSheet = (o) => o.classList.remove("show");
 addEventListener("keydown", (e) => {
   if (!$("intro").hidden) return; // the intro handles its own keys
   const o = openSheet();
   if (o) {
-    if (e.key === "Escape") o === $("overlay") ? closeForm() : closeSettings();
+    if (e.key === "Escape")
+      o === $("overlay")
+        ? closeForm()
+        : o === $("cardV")
+          ? closeCard()
+          : o === $("cardsO")
+            ? closeCards()
+            : closeSettings();
     if (e.key === "Tab") {
       const f = [...o.querySelectorAll("button:not([hidden]),input")].filter((x) => x.offsetParent);
       const first = f[0],
@@ -567,6 +582,139 @@ $("setBg").onclick = (e) => {
   syncSettings();
 };
 $("setDone").onclick = closeSettings;
+
+/* cards: one per all-time milestone */
+const MILESTONES = [10, 20, 50, 100, 200, 500, 1000];
+const totalAll = () => tasks.reduce((a, t) => a + t.count, 0);
+// Rarity is the finish: soft foil, strong holo, then gold.
+const tier = (m) => (m >= 200 ? 3 : m >= 50 ? 2 : 1);
+const cardFace = (m) =>
+  `<div class="cf t${tier(m)}${m >= 1000 ? " wide" : ""}"><span class="cf-top">Side Quests</span><b class="cf-num">${m}</b><span class="cf-lbl">quests done</span></div>`;
+function renderCards() {
+  const all = totalAll();
+  $("cardsList").innerHTML = MILESTONES.map((m) =>
+    all >= m
+      ? `<li class="got"><button type="button" data-m="${m}" aria-label="Card ${m}, view">${cardFace(m)}</button></li>`
+      : `<li><b class="num${m >= 1000 ? " wide" : ""}">${m}</b><small>${m - all} to go</small></li>`,
+  ).join("");
+}
+$("cardsList").onclick = (e) => {
+  const b = e.target.closest("[data-m]");
+  if (b) openCard(+b.dataset.m);
+};
+// Viewer: the card tilts toward the pointer and the foil follows it.
+function openCard(m) {
+  const back = document.activeElement;
+  $("holo").innerHTML = cardFace(m);
+  $("cvT").textContent = `Card: ${m} quests done`;
+  $("cardV").dataset.back = back && back.id ? back.id : "";
+  showSheet($("cardV"));
+  setTimeout(() => $("cvDone").focus(), 20);
+}
+function closeCard() {
+  hideSheet($("cardV"));
+  const id = $("cardV").dataset.back;
+  if (id && $(id)) $(id).focus();
+}
+$("cvDone").onclick = closeCard;
+$("cardV").onclick = (e) => {
+  if (e.target === $("cardV") || e.target.classList.contains("cv")) closeCard();
+};
+const holo = $("holo");
+holo.onpointermove = (e) => {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const r = holo.getBoundingClientRect(),
+    x = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)),
+    y = Math.min(1, Math.max(0, (e.clientY - r.top) / r.height));
+  holo.classList.add("live");
+  holo.style.setProperty("--ry", `${(x - 0.5) * 26}deg`);
+  holo.style.setProperty("--rx", `${(0.5 - y) * 26}deg`);
+  holo.style.setProperty("--mx", `${x * 100}%`);
+  holo.style.setProperty("--my", `${y * 100}%`);
+};
+holo.onpointerleave =
+  holo.onpointercancel =
+  holo.onpointerup =
+    (e) => {
+      if (e.type === "pointerup" && e.pointerType === "mouse") return;
+      holo.classList.remove("live");
+      ["--rx", "--ry", "--mx", "--my"].forEach((p) => holo.style.removeProperty(p));
+    };
+// Milestone: the card pops up mid-screen, glints, lingers a moment, then stashes into the
+// Cards button. Nothing to dismiss and no dim; tapping it while it's up opens it big.
+let popAnim = null;
+function cardEarned(m) {
+  const p = $("cardPop"),
+    box = $("cardPopBox");
+  if (popAnim) popAnim.cancel();
+  p.innerHTML = cardFace(m);
+  p.dataset.m = m;
+  p.setAttribute("aria-label", `New card: ${m} quests done. Open it`);
+  box.hidden = false;
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches,
+    tgt = [$("dCards"), $("mCards")].find((x) => x.offsetParent),
+    r = p.getBoundingClientRect(),
+    t = tgt.getBoundingClientRect(),
+    dx = t.left + t.width / 2 - (r.left + r.width / 2),
+    dy = t.top + t.height / 2 - (r.top + r.height / 2);
+  popAnim = p.animate(
+    reduce
+      ? [{ opacity: 1 }, { opacity: 1, offset: 0.85 }, { opacity: 0 }]
+      : [
+          // pop in with a small overshoot, linger, then accelerate into the Cards button
+          {
+            transform: "translateY(60px) scale(0.5) rotate(-10deg)",
+            opacity: 0,
+            easing: "cubic-bezier(.2,.9,.3,1.2)",
+          },
+          { transform: "none", opacity: 1, offset: 0.14 },
+          { transform: "none", opacity: 1, offset: 0.72, easing: "cubic-bezier(.5,0,.75,0)" },
+          { transform: `translate(${dx}px, ${dy}px) scale(0.1) rotate(12deg)`, opacity: 0.7 },
+        ],
+    { duration: 3400 },
+  );
+  popAnim.onfinish = () => {
+    box.hidden = true;
+    popAnim = null;
+    // Catch it softly: only the icon swells a little, never the whole menu row.
+    if (!reduce)
+      tgt
+        .querySelector(".ms")
+        .animate(
+          [{ transform: "none" }, { transform: "scale(1.2)", offset: 0.4 }, { transform: "none" }],
+          {
+            duration: 420,
+            easing: "ease-out",
+          },
+        );
+  };
+}
+$("cardPop").onclick = () => {
+  if (popAnim) popAnim.cancel();
+  popAnim = null;
+  $("cardPopBox").hidden = true;
+  openCard(+$("cardPop").dataset.m);
+};
+function openCards() {
+  lastFocus = document.activeElement;
+  renderCards();
+  $("dCards").setAttribute("aria-current", "page");
+  $("dQuests").removeAttribute("aria-current");
+  showSheet($("cardsO"));
+  setTimeout(() => $("cardsT").focus(), 20);
+}
+function closeCards() {
+  hideSheet($("cardsO"));
+  $("dQuests").setAttribute("aria-current", "page");
+  $("dCards").removeAttribute("aria-current");
+  lastFocus && lastFocus.focus && lastFocus.focus();
+}
+$("mCards").onclick = $("dCards").onclick = openCards;
+$("dQuests").onclick = () => scrollTo({ top: 0, behavior: "smooth" });
+$("cardsDone").onclick = closeCards;
+$("cardsO").onclick = (e) => {
+  if (e.target === $("cardsO")) closeCards();
+};
 $("setO").onclick = (e) => {
   if (e.target === $("setO")) closeSettings();
 };

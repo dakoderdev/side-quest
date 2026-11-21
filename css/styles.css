@@ -1235,6 +1235,260 @@ canvas#fx {
 .dock {
   display: none;
 }
+.tcount {
+  display: none;
+}
+/* Card milestones (placeholder collection). */
+.milestones {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s3);
+  margin: 0 0 var(--s5);
+  padding: 0;
+  list-style: none;
+}
+/* Locked: number dead centre, "N to go" pinned to the bottom. */
+.milestones li {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding-bottom: 0;
+  aspect-ratio: 5 / 7;
+  border-radius: 6px;
+  font: 700 13px/1 var(--cond);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  background: var(--sunken);
+  box-shadow: inset 0 0 0 1px var(--hairline);
+}
+.milestones li b {
+  font:
+    400 44px/0.8 "Pricedown",
+    var(--cond);
+  transform: translateY(-0.06em);
+}
+.milestones li b.wide {
+  font-size: 32px;
+}
+.milestones li small {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 10%;
+  font: inherit;
+  text-align: center;
+}
+/* Title and Done stay put; only the card grid scrolls. */
+#cardsO .sheet {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+#cardsO .milestones {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--hairline) transparent;
+  /* room so outlines and focus rings aren't clipped at the scroll edges */
+  padding: 4px 4px 24px;
+  /* same gap under the lede as a .field; minus the 4px edge padding */
+  margin: calc(var(--s5) - 4px) -4px var(--s2);
+  /* fade the bottom edge so cut-off cards read as "more below" */
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 24px), transparent);
+}
+.milestones li.got {
+  display: block;
+  background: none;
+  box-shadow: none;
+}
+.milestones li.got button {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 6px;
+}
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+/* ---------- card face ----------
+   No illustration: a big Pricedown number on the sunset, with the shine done in code.
+   Rarity is the finish: t1 soft foil, t2 strong holo, t3 gold. */
+.cf {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  justify-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 7% 6%;
+  overflow: hidden;
+  border-radius: 6px;
+  color: #fff;
+  background: var(--sunset);
+  box-shadow:
+    inset 0 0 0 2px #1d0030,
+    inset 0 0 0 5px rgba(255, 255, 255, 0.18);
+  container-type: inline-size;
+}
+.cf.t3 {
+  background:
+    radial-gradient(120% 80% at 30% 10%, #fff3c4 0%, transparent 45%),
+    linear-gradient(160deg, #f6c453 0%, #c7832a 45%, #7a3e14 100%);
+}
+.cf-top,
+.cf-lbl {
+  font: 700 7cqi/1 var(--cond);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  -webkit-text-stroke: 0.9cqi #1d0030;
+  paint-order: stroke fill;
+}
+.cf-num {
+  align-self: center;
+  font:
+    400 42cqi/0.8 "Pricedown",
+    var(--cond);
+  -webkit-text-stroke: 3cqi #1d0030;
+  paint-order: stroke fill;
+  text-shadow: 0 1.5cqi 0 #1d0030;
+  transform: translateY(-0.06em);
+}
+.cf.wide .cf-num {
+  font-size: 32cqi;
+}
+/* Foil and glare sit on top and follow --mx/--my (pointer position). */
+.cf::before,
+.cf::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.cf::before {
+  background: repeating-linear-gradient(
+    115deg,
+    #ff7eb3 0%,
+    #ffd36e 7%,
+    #7dffcb 14%,
+    #78b6ff 21%,
+    #c58bff 28%,
+    #ff7eb3 35%
+  );
+  background-size: 250% 250%;
+  background-position: var(--mx, 50%) var(--my, 50%);
+  mix-blend-mode: color-dodge;
+  opacity: 0.18;
+}
+.cf.t2::before {
+  opacity: 0.42;
+}
+.cf.t3::before {
+  opacity: 0.3;
+  mix-blend-mode: overlay;
+}
+.cf::after {
+  background: radial-gradient(
+    circle at var(--mx, 50%) var(--my, 50%),
+    rgba(255, 255, 255, 0.5),
+    transparent 45%
+  );
+  mix-blend-mode: overlay;
+}
+
+/* ---------- card viewer ---------- */
+.cardview.show {
+  place-items: center;
+}
+.cv {
+  display: grid;
+  justify-items: center;
+  gap: var(--s6);
+}
+.holo {
+  --rx: 0deg;
+  --ry: 0deg;
+  width: min(300px, 70vw, 50dvh);
+  aspect-ratio: 5 / 7;
+  border-radius: 12px;
+  transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry));
+  transition: transform 0.5s var(--ease);
+  touch-action: none;
+  filter: drop-shadow(0 24px 40px rgba(0, 0, 0, 0.55));
+}
+.holo.live {
+  transition: none;
+}
+.holo .cf {
+  border-radius: 12px;
+}
+.cardview.show .holo {
+  animation: cardin 0.5s var(--ease);
+}
+/* The glint: one sweep of the glare across the card as it arrives. */
+.cardview.show .holo .cf::after {
+  animation: glint 0.9s 0.2s var(--ease) backwards;
+}
+@keyframes cardin {
+  from {
+    opacity: 0;
+    transform: perspective(900px) translateY(24px) rotateY(-25deg) scale(0.9);
+  }
+}
+@keyframes glint {
+  from {
+    background-position: -150% -150%;
+    background-size: 300% 300%;
+  }
+  to {
+    background-position: 150% 150%;
+    background-size: 300% 300%;
+  }
+}
+
+/* ---------- milestone pop ----------
+   No dim and no catch: only the card itself takes taps, the screen stays usable. */
+.cardpop {
+  position: fixed;
+  inset: 0;
+  z-index: 15;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+.cardpop[hidden] {
+  display: none;
+}
+#cardPop {
+  width: min(200px, 50vw);
+  aspect-ratio: 5 / 7;
+  border-radius: 10px;
+  pointer-events: auto;
+  filter: drop-shadow(0 18px 30px rgba(0, 0, 0, 0.6));
+}
+#cardPop .cf {
+  border-radius: 10px;
+}
+#cardPop .cf::after {
+  animation: glint 1s 0.45s var(--ease) backwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .holo {
+    transform: none !important;
+  }
+  .cardview.show .holo,
+  .cardview.show .holo .cf::after,
+  #cardPop .cf::after {
+    animation: none;
+  }
+}
 /* Shortcut legend, like the reference's controller prompts. Desktop only. */
 .legend {
   position: fixed;
@@ -1295,16 +1549,23 @@ canvas#fx {
   }
   #tSet {
     display: inline-grid;
-    margin-left: auto;
+    margin-right: calc(-1 * var(--s3));
+    color: #fff;
+  }
+  #tSet:hover {
+    background: rgba(255, 255, 255, 0.12);
   }
   #density {
     display: inline-grid;
+    margin-left: auto;
   }
+  /* One-line band: logo, all-time total, settings. Today's count moves to the Done today tab. */
   .side {
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 1fr auto auto;
     align-items: center;
-    padding: calc(var(--s4) + env(safe-area-inset-top)) var(--s5) var(--s4);
+    gap: var(--s2);
+    padding: calc(var(--s2) + env(safe-area-inset-top)) var(--s5) var(--s2);
     background: var(--sunset);
     box-shadow: none;
   }
@@ -1313,8 +1574,53 @@ canvas#fx {
     padding: 0;
     background: none;
   }
+  .logo br {
+    display: none;
+  }
   .side .points {
     display: grid;
+  }
+  .side .pt.day {
+    display: none;
+  }
+  /* Map-marker tag like the game's blips: outlined mint box with a pointer on its left,
+     aimed at the tab label it belongs to. */
+  .tcount {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    min-width: 22px;
+    height: 22px;
+    margin-left: 10px;
+    padding: 0 5px;
+    border: 2px solid #1d0030;
+    border-radius: 5px;
+    font: 700 13px/1 var(--cond);
+    color: #1d0030;
+    background: var(--mint);
+  }
+  .tcount::before,
+  .tcount::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    border-style: solid;
+    border-color: transparent;
+    transform: translateY(-50%);
+  }
+  /* outline triangle, then the mint fill over it */
+  .tcount::before {
+    right: 100%;
+    border-width: 7px 8px 7px 0;
+    border-right-color: #1d0030;
+  }
+  .tcount::after {
+    right: calc(100% - 3px);
+    border-width: 5px 6px 5px 0;
+    border-right-color: var(--mint);
+  }
+  .tcount:empty {
+    display: none;
   }
   body::before {
     content: "";
@@ -1348,21 +1654,45 @@ canvas#fx {
   .card {
     padding: var(--s5) var(--s4) var(--s3) var(--s4);
   }
+  /* Dock is the phone nav: Quests and Cards flank the loud New quest button. */
   .dock {
-    display: block;
+    display: grid;
+    grid-template-columns: 64px 1fr 64px;
+    align-items: center;
+    gap: var(--s2);
     position: fixed;
     left: 0;
     right: 0;
     bottom: 0;
     z-index: 10;
-    padding: var(--s3) var(--s4) calc(var(--s3) + env(safe-area-inset-bottom))
-      calc(var(--s4) + var(--bar-gap) + var(--bar-w));
+    padding: var(--s2) var(--s2) calc(var(--s2) + env(safe-area-inset-bottom));
     background: var(--surface);
     box-shadow: 0 -8px 24px -8px rgba(6, 6, 24, 0.6);
   }
   .dock .btn {
-    width: 100%;
+    width: auto;
     min-height: 52px;
+    margin-left: calc(var(--bar-gap) + var(--bar-w));
+  }
+  .dnav {
+    display: grid;
+    justify-items: center;
+    gap: 2px;
+    min-height: 52px;
+    align-content: center;
+    font: 700 12px/1 var(--cond);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-3);
+  }
+  .dnav .ms {
+    --ms: 22px;
+    /* the label's uppercase and tracking would break the icon ligature */
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .dnav[aria-current="page"] {
+    color: var(--pink);
   }
   .dock .btn::before {
     transform: none;
