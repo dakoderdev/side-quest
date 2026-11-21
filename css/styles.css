@@ -514,6 +514,14 @@ button.key:hover {
   gap: var(--s3);
   margin-top: var(--s2);
 }
+/* A finished one-off fades and sinks as it leaves the list. */
+.card.leaving {
+  opacity: 0;
+  transform: scale(0.97);
+  transition:
+    opacity 0.25s var(--ease),
+    transform 0.25s var(--ease);
+}
 .actions {
   display: flex;
   gap: var(--s3);
@@ -720,6 +728,41 @@ button.key:hover {
 }
 .pace {
   grid-template-columns: repeat(3, 1fr);
+}
+.pace[hidden] {
+  display: none;
+}
+/* The One-off switch rides on the pace label's line, so it adds no row to the sheet. */
+.lbl-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  margin-bottom: var(--s2);
+}
+.lbl-row .lbl {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-2);
+}
+.toggle.mini {
+  gap: var(--s2);
+  min-height: 44px;
+  margin: -12px calc(-1 * var(--s2)) -12px 0;
+  padding: 0 var(--s2);
+  background: none;
+  font-size: 14px;
+  color: var(--text-2);
+}
+.toggle.mini:hover {
+  background: none;
+  color: var(--text);
+}
+.toggle.mini i {
+  font-size: 14px;
+}
+.toggle.mini[hidden] {
+  display: none;
 }
 .pace .sel {
   min-height: 56px;
@@ -929,7 +972,39 @@ button.key:hover {
 }
 .compact .ttl {
   grid-column: 2;
-  cursor: pointer;
+}
+/* Rows are pressed and held to edit: no text selection or iOS callout, and the row
+   lightens while held so the press reads as intentional. */
+.compact .card {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  transition: background-color 0.5s linear;
+}
+@media (hover: hover) {
+  .compact .card {
+    cursor: pointer;
+  }
+}
+.compact .card.pressing {
+  background-color: var(--sunken-hi);
+}
+/* The edit button stays reachable by keyboard and screen readers, but isn't drawn
+   until it has focus. */
+.compact [data-edit] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.compact [data-edit]:focus-visible {
+  position: static;
+  width: auto;
+  height: auto;
+  clip-path: none;
+  grid-column: 5;
+  grid-row: 1/3;
 }
 .compact .ttl h3 {
   font-size: 18px;
@@ -940,9 +1015,11 @@ button.key:hover {
 .compact .ttl p,
 .compact .meta,
 .compact .lv span,
-.compact [data-edit],
 .compact [data-done] .bt {
   display: none;
+}
+.compact .once .ttl {
+  grid-row: 1/3;
 }
 .compact .prog {
   grid-column: 2;

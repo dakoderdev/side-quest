@@ -100,6 +100,8 @@ async function importData(file) {
     base: t.base,
     count: Math.max(0, Math.floor(t.count)),
     log: t.log.slice(-500),
+    ...(t.once === true && { once: true }),
+    ...(t.once === true && Number.isFinite(t.from) && { from: t.from }),
   }));
   save();
   closeSettings();

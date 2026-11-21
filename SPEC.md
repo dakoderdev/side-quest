@@ -21,7 +21,7 @@ The only source of truth about the program. Each fact is short, atomic and verif
 - The service worker is stale-while-revalidate: it answers from the cache and refreshes in the background.
 - A new deploy shows on the launch after it is fetched.
 - The service worker caches Google Fonts responses.
-- The service worker cache name is `sq-v27`.
+- The service worker cache name is `sq-v30`.
 - The service worker precaches every app file.
 - `netlify.toml` publishes the folder with no build.
 - `sw.js` is served with `Cache-Control: no-cache`.
@@ -33,6 +33,9 @@ The only source of truth about the program. Each fact is short, atomic and verif
 - The storage key is `sidequests.v1`.
 - Data does not sync between devices.
 - A quest has `id`, `name`, `icon`, `base`, `count` and `log`.
+- A one-off quest also has `once: true`.
+- A quest turned into a one-off stores its earlier count in `from`.
+- A one-off is finished once its count passes `from` (0 if unset).
 - A quest's `log` keeps at most 500 entries.
 - The compact-mode preference is stored under `sidequests.compact`.
 - Settings are stored under `sidequests.settings`.
@@ -55,6 +58,14 @@ The only source of truth about the program. Each fact is short, atomic and verif
 - Level n→n+1 needs `base + (n-1) * ceil(base/2)` completions.
 - Quests start at level 1.
 - New quests appear first in the list.
+- The new-quest sheet has a One-off switch on the pace label's line.
+- Turning One-off on hides the pace tiles.
+- A one-off quest has no level or progress bar.
+- A one-off quest shows "One-off" under its icon.
+- A finished one-off leaves All and To do, fading out after the Done lock.
+- A finished one-off shows under Done today on the day it was done.
+- A finished one-off stays stored, so its completion still counts as a point.
+- Edit can switch a quest between one-off and repeating.
 - The edit screen can change a quest's completion count.
 - There are 68 quest icons.
 - The icon picker has 8px row gaps and 10px column gaps.
@@ -85,7 +96,11 @@ The only source of truth about the program. Each fact is short, atomic and verif
 - The phone header shows no clock.
 - Settings open from the sidebar on desktop and a gear in the top bar on phones.
 - Compact mode shows each quest as one row.
-- In compact mode, tapping a quest name opens its edit screen.
+- In compact mode, holding a row for 500ms opens its edit screen.
+- Moving more than 10px cancels the hold-to-edit press.
+- A held compact row lightens while the press runs.
+- On desktop, compact rows show a pointer cursor.
+- In compact mode, the edit button is hidden until it has keyboard focus.
 - Layout switches to phone mode at 820px wide or less.
 
 ### Feedback
@@ -305,6 +320,15 @@ Cache bumped to `sq-v26`.
 ### 2026-11-21 — Enter doesn't submit on phones
 Pressing Done/Enter on the phone keyboard after typing a name created the quest and closed the sheet before you could pick an icon or pace. On touch screens it now just closes the keyboard. Desktop Enter still submits.
 
+### 2026-11-21 — One-off quests, hold to edit in compact
+- One-off quests ("temporary quests" from Open). A fourth pace tile crowded the sheet, so One-off is a small switch on the pace label's line instead: no new row, and the pace tiles hide when it's on. Finished one-offs stay stored so points stay honest, show in Done today for the day, then are hidden.
+- Compact mode: hold a row to edit, instead of tapping the name. It keeps compact free of extra controls; the edit button stays reachable by keyboard.
+Cache bumped to `sq-v28`.
+
+### 2026-11-21 — Any quest can become a one-off
+Edit can now turn a repeating quest into a one-off. Its past completions are kept in `from` so they still count as points, and only the next completion finishes it. Compact rows show a pointer cursor on desktop.
+Cache bumped to `sq-v30`.
+
 ### Open
 **Accepted, to build**
 - "Pick one for me" random quest button.
@@ -313,7 +337,6 @@ Pressing Done/Enter on the phone keyboard after typing a name created the quest 
 
 **Maybe**
 - Statistics: how many quests were done (per day, week, all time).
-- Temporary quests: one-off quests that go away once done.
 - Categories for quests.
 - One gentle reminder to open the app (never per-task).
 - Gentle daily goal ("3 quests today") with no penalty. Not discussed yet.

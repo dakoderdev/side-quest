@@ -27,11 +27,16 @@ const save = () => {
 const $ = (id) => document.getElementById(id);
 const today = () => new Date().toDateString();
 const doneToday = (t) => t.log.filter((d) => d === today()).length;
+// A one-off quest is finished once it's done. It stays stored (its point still counts),
+// shows under "Done today" for the rest of the day, then is hidden for good.
+// A quest turned into a one-off keeps its past completions in `from`, so only a new one finishes it.
+const finished = (t) => t.once && t.count > (t.from || 0);
 const esc = (s) =>
   s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 let filter = "all",
   icon = "shoe",
   pace = 5,
+  once = false,
   editing = null,
   draftCount = 0;
 
@@ -68,19 +73,28 @@ const toGo = (L) => `${L.need - L.into} to Lv ${L.lv + 1}`;
 function cardHTML(t) {
   const L = lvInfo(t),
     d = doneToday(t);
+  // One-offs never level, so they skip the level number and progress bar.
+  if (t.once)
+    return `<article class="card once${d ? " done" : ""}" data-id="${t.id}">
+    <div class="hd"><span class="blip"><span class="pin">${ic(t.icon)}</span><small class="num">One-off</small></span>
+      <div class="ttl"><h3 class="t-title">${esc(t.name)}</h3><p>${doneHTML(d)}</p></div></div>
+    ${actionsHTML(t)}
+  </article>`;
   return `<article class="card${d ? " done" : ""}" data-id="${t.id}">
     <div class="hd"><span class="blip"><span class="pin">${ic(t.icon)}</span><small class="num">${toGo(L)}</small></span>
       <div class="ttl"><h3 class="t-title">${esc(t.name)}</h3><p>${doneHTML(d)}</p></div>
       <div class="lv"><span>Level</span><b class="num">${L.lv}</b></div></div>
     <div class="prog"><div class="track${L.need <= SEG_MAX ? " seg" : ""}" role="progressbar" aria-label="${toGo(L)}" aria-valuemin="0" aria-valuemax="${L.need}" aria-valuenow="${L.into}">${trackHTML(L)}</div></div>
-    <div class="actions"><button class="btn" data-done aria-label="Hold to complete ${esc(t.name)}"><span class="ring">${gl(P_CHECK)}</span><span class="bt">Complete</span></button>
-      <button class="iconbtn" data-edit aria-label="Edit ${esc(t.name)}">${gl(P_EDIT)}</button></div>
+    ${actionsHTML(t)}
   </article>`;
 }
+const actionsHTML = (t) =>
+  `<div class="actions"><button class="btn" data-done aria-label="Hold to complete ${esc(t.name)}"><span class="ring">${gl(P_CHECK)}</span><span class="bt">Complete</span></button>
+      <button class="iconbtn" data-edit aria-label="Edit ${esc(t.name)}">${gl(P_EDIT)}</button></div>`;
 
 function render() {
-  const list = tasks.filter(
-    (t) => filter === "all" || (filter === "todo" ? !doneToday(t) : doneToday(t)),
+  const list = tasks.filter((t) =>
+    filter === "done" ? doneToday(t) : !finished(t) && (filter === "all" || !doneToday(t)),
   );
   $("grid").innerHTML = list.map(cardHTML).join("");
   const e = $("empty");
@@ -88,7 +102,7 @@ function render() {
   if (!list.length) {
     e.innerHTML = !tasks.length
       ? `<p>Start with something tiny, like putting on shoes or drinking a glass of water. Each time you do it, press and hold Complete.</p><button class="btn" data-new>${gl(P_PLUS)}New quest</button>`
-      : filter === "todo"
+      : filter !== "done"
         ? "<p>Everything’s done for today.</p>"
         : "<p>Nothing completed yet today.</p>";
   }
@@ -159,6 +173,17 @@ $("fPace").onclick = (e) => {
     pace = +b.dataset.v;
   }
 };
+// One-off switch: a one-off never levels, so the pace tiles and count stepper step aside.
+function syncOnce() {
+  $("fOnce").setAttribute("aria-checked", once);
+  $("fPace").hidden = once;
+  $("paceL").textContent = once ? "No levels. It’s gone once it’s done." : "Level up every";
+  $("countF").hidden = !editing || once;
+}
+$("fOnce").onclick = () => {
+  once = !once;
+  syncOnce();
+};
 $("countF").onclick = (e) => {
   const b = e.target.closest("[data-step]");
   if (!b) return;
@@ -179,6 +204,7 @@ function openForm(t) {
   $("fName").placeholder = "Put on shoes";
   icon = t ? t.icon : draft ? draft.icon : "shoe";
   pace = t ? t.base : draft ? draft.pace : 5;
+  once = t ? !!t.once : draft ? draft.once : false;
   draftCount = t ? t.count : 0;
   pickVal($("fIcons"), "k", icon);
   requestAnimationFrame(() => {
@@ -187,7 +213,7 @@ function openForm(t) {
     g.scrollTop = b ? b.offsetTop - g.offsetTop - 8 : 0;
   });
   pickVal($("fPace"), "v", pace);
-  $("countF").hidden = !t;
+  syncOnce();
   $("fDelete").hidden = !t;
   $("fCount").textContent = draftCount;
   if (!t) {
@@ -202,7 +228,7 @@ function openForm(t) {
 function closeForm(saved) {
   if (!editing && saved !== true) {
     const name = $("fName").value.trim();
-    draft = name ? { name, icon, pace } : null;
+    draft = name ? { name, icon, pace, once } : null;
   }
   $("mQuests").setAttribute("aria-current", "page");
   $("mNew").removeAttribute("aria-current");
@@ -278,6 +304,13 @@ $("form").onsubmit = (e) => {
     t.name = name;
     t.icon = icon;
     t.base = pace;
+    if (once && !t.once) {
+      t.once = true;
+      if (draftCount) t.from = draftCount;
+    } else if (!once) {
+      delete t.once;
+      delete t.from;
+    }
     if (diff < 0) for (let i = 0; i < -diff; i++) t.log.pop(); // drop most recent completions
     if (diff > 0) for (let i = 0; i < diff; i++) t.log.push(null); // added by hand: not counted as "today"
     t.count = draftCount;
@@ -287,7 +320,9 @@ $("form").onsubmit = (e) => {
     blip(660, 0.06);
     return;
   }
-  tasks.unshift({ id: Date.now(), name, icon, base: pace, count: 0, log: [] });
+  const q = { id: Date.now(), name, icon, base: pace, count: 0, log: [] };
+  if (once) q.once = true;
+  tasks.unshift(q);
   save();
   draft = null;
   closeForm(true);
@@ -346,9 +381,39 @@ const taskOf = (el) => tasks.find((x) => x.id === +el.closest(".card").dataset.i
 $("grid").onclick = (e) => {
   const card = e.target.closest(".card");
   if (!card) return;
-  if (e.target.closest("[data-edit]") || (compact && e.target.closest(".ttl")))
-    openForm(taskOf(card));
+  if (e.target.closest("[data-edit]")) openForm(taskOf(card));
 };
+
+/* Compact: press and hold a row (anywhere but Complete) to edit it.
+   Moving the finger, e.g. to scroll, cancels the press. */
+const EDIT_HOLD_MS = 500;
+let press = null;
+const pressEnd = () => {
+  if (!press) return;
+  clearTimeout(press.t);
+  press.card.classList.remove("pressing");
+  press = null;
+};
+$("grid").addEventListener("pointerdown", (e) => {
+  const card = e.target.closest(".card");
+  if (!compact || !card || e.button !== 0 || e.target.closest("[data-done],[data-edit]")) return;
+  card.classList.add("pressing");
+  press = {
+    card,
+    x: e.clientX,
+    y: e.clientY,
+    t: setTimeout(() => {
+      pressEnd();
+      buzz(10);
+      openForm(taskOf(card));
+    }, EDIT_HOLD_MS),
+  };
+});
+$("grid").addEventListener("pointermove", (e) => {
+  if (press && Math.hypot(e.clientX - press.x, e.clientY - press.y) > 10) pressEnd();
+});
+addEventListener("pointerup", pressEnd);
+addEventListener("pointercancel", pressEnd);
 
 /* Hold to complete: a ring fills around the check, like a game's hold prompt.
    Letting go early cancels. The button is locked while it shows "Done",
@@ -406,7 +471,7 @@ $("grid").addEventListener("pointerout", (e) => {
     holdEnd(true);
 });
 $("grid").addEventListener("contextmenu", (e) => {
-  if (e.target.closest("[data-done]")) e.preventDefault();
+  if (e.target.closest("[data-done]") || (compact && e.target.closest(".card"))) e.preventDefault();
 });
 $("grid").addEventListener("keydown", (e) => {
   const b = e.target.closest("[data-done]");
@@ -432,20 +497,8 @@ function complete(btn) {
   // update in place so the bar animates instead of re-rendering
   card.classList.add("done");
   card.querySelector(".ttl p").innerHTML = doneHTML(doneToday(t));
-  card.querySelector(".blip small").textContent = toGo(L);
-  const track = card.querySelector(".track");
-  track.setAttribute("aria-valuenow", L.into);
-  track.setAttribute("aria-valuemax", L.need);
-  track.setAttribute("aria-label", toGo(L));
-  const seg = L.need <= SEG_MAX;
-  if (seg && track.children.length === L.need) track.children[L.into - 1]?.classList.add("on");
-  else if (!seg && !track.classList.contains("seg"))
-    track.firstElementChild.style.width = (L.into / L.need) * 100 + "%";
-  else {
-    // Level-up: the next level needs a different number of segments.
-    track.classList.toggle("seg", seg);
-    track.innerHTML = trackHTML(L);
-  }
+  const track = card.querySelector(".track"); // one-offs have no bar
+  if (track) updateTrack(card, track, L);
   btn.classList.add("hit");
   clearTimeout(btn.hintT);
   btn.querySelector(".bt").textContent = "Done";
@@ -476,7 +529,26 @@ function complete(btn) {
     $("lvup").classList.remove("show");
     render();
   });
-  if (filter !== "all") setTimeout(render, 950);
+  // A finished one-off leaves the list when the "Done" lock ends, like quests leaving a filtered tab.
+  if (t.once && filter !== "done") {
+    setTimeout(() => card.classList.add("leaving"), 700);
+    setTimeout(render, 950);
+  } else if (filter !== "all") setTimeout(render, 950);
+}
+function updateTrack(card, track, L) {
+  card.querySelector(".blip small").textContent = toGo(L);
+  track.setAttribute("aria-valuenow", L.into);
+  track.setAttribute("aria-valuemax", L.need);
+  track.setAttribute("aria-label", toGo(L));
+  const seg = L.need <= SEG_MAX;
+  if (seg && track.children.length === L.need) track.children[L.into - 1]?.classList.add("on");
+  else if (!seg && !track.classList.contains("seg"))
+    track.firstElementChild.style.width = (L.into / L.need) * 100 + "%";
+  else {
+    // Level-up: the next level needs a different number of segments.
+    track.classList.toggle("seg", seg);
+    track.innerHTML = trackHTML(L);
+  }
 }
 
 /* settings */
