@@ -21,7 +21,7 @@ The only source of truth about the program. Each fact is short, atomic and verif
 - The service worker is stale-while-revalidate: it answers from the cache and refreshes in the background.
 - A new deploy shows on the launch after it is fetched.
 - The service worker caches Google Fonts responses.
-- The service worker cache name is `sq-v30`.
+- The service worker cache name is `sq-v32`.
 - The service worker precaches every app file.
 - `netlify.toml` publishes the folder with no build.
 - `sw.js` is served with `Cache-Control: no-cache`.
@@ -77,6 +77,10 @@ The only source of truth about the program. Each fact is short, atomic and verif
 - "Done today" counts completions with today's date.
 - A points counter shows all-time completions in Pricedown.
 - The points counter shows completions today below the total.
+- The all-time total ends in a pink star in a small circle of dark pink.
+- The today count ends in a mint check in a small circle of dark mint.
+- Each counter circle has a 1.5px inset ring slightly lighter than its fill.
+- The today count is white uppercase Barlow Condensed with a 2px `#1d0030` outline, like the total.
 - The points counter is top right on desktop and in the phone header.
 - Tabs sit centred between Q and E chips on desktop.
 - Q and E switch tabs.
@@ -109,6 +113,7 @@ The only source of truth about the program. Each fact is short, atomic and verif
 - While holding, a pink ring closes around the check; it is the button's only animation.
 - In compact view, Complete is a round white glyph whose grey ring fills white, as in `hold-button-reference.png`.
 - Releasing early cancels and shows "Hold it".
+- On touch screens, the compact Complete ring scales to 1.8× while held.
 - Space or Enter can be held on a focused Complete button.
 - Complete is locked for 900ms after completing.
 - Completing a quest plays a ding.
@@ -328,6 +333,14 @@ Cache bumped to `sq-v28`.
 ### 2026-11-21 — Any quest can become a one-off
 Edit can now turn a repeating quest into a one-off. Its past completions are kept in `from` so they still count as points, and only the next completion finishes it. Compact rows show a pointer cursor on desktop.
 Cache bumped to `sq-v30`.
+
+### 2026-11-21 — Bigger hold ring in compact on phones
+The finger hid the small compact ring while holding. It now grows to 1.8× while held, so the fill shows around the fingertip.
+Cache bumped to `sq-v31`.
+
+### 2026-11-21 — Counter badges
+Like the money counters in `ui-reference.png`, each counter line ends in a glyph in a small circle, a dark shade of the glyph colour: a pink star for all-time completions, a mint check (the done colour) for today. Each circle has a lighter inset ring. The today label lost its dark box on phones and gets the total's outlined text instead.
+Cache bumped to `sq-v32`.
 
 ### Open
 **Accepted, to build**

@@ -115,7 +115,8 @@ function points() {
   const td = tasks.reduce((a, t) => a + doneToday(t), 0),
     all = tasks.reduce((a, t) => a + t.count, 0);
   document.querySelectorAll("[data-points]").forEach((n) => {
-    n.innerHTML = `<b class="num">${all}</b><span class="num">${td} today</span>`;
+    // Each line ends in a glyph, like the money counters: a star for all time, a check for today.
+    n.innerHTML = `<span class="pt"><b class="num">${all}</b><i class="badge all" aria-hidden="true"><span class="ms">star</span></i></span><span class="pt day"><span class="num">${td} today</span><i class="badge" aria-hidden="true"><span class="ms">check</span></i></span>`;
     n.title = `${all} completed all time, ${td} today`;
     if (lastAll !== null && all > lastAll) n.querySelector("b").classList.add("bump");
   });
